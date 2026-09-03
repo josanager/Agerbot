@@ -54,7 +54,7 @@ WEB_UI_HTML = """<!DOCTYPE html>
         </div>
         <div class="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-sm p-4 text-sm text-slate-200 max-w-[85%] shadow-sm leading-relaxed">
           <p class="font-medium text-indigo-400 mb-1">Agerbot Creativo listo</p>
-          <p>Escribe tu mensaje en la barra inferior para conversar libremente, o ve a la pestaña <b>«Entrenar Modelo»</b> para enseñarle nuevo contenido con un solo clic.</p>
+          <p>Habla aquí con Agerbot. En <b>«Entrenar Modelo»</b> pegas diálogos y se entrena este mismo modelo; luego vuelve y pregúntale si lo entendió.</p>
         </div>
       </div>
     </main>
@@ -106,7 +106,7 @@ WEB_UI_HTML = """<!DOCTYPE html>
         </div>
         <div>
           <h3 class="font-bold text-base text-white">¡Entrenamiento Terminado con Éxito!</h3>
-          <p class="text-xs text-emerald-300/90 mt-0.5">Agerbot principal se ha ajustado con la mezcla de datos anterior y nuevos, y se ha cargado automáticamente. Ya puedes probarlo en el chat.</p>
+          <p class="text-xs text-emerald-300/90 mt-0.5">El mismo Agerbot ya está cargado. Pregúntale en el chat con otras palabras, no copiando el texto que pegaste.</p>
         </div>
       </div>
       <button onclick="switchTab('chat')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-xl transition shadow-lg shrink-0">
@@ -119,7 +119,7 @@ WEB_UI_HTML = """<!DOCTYPE html>
       <div class="flex items-center justify-between border-b border-slate-800/80 pb-4">
         <div>
           <h2 class="font-bold text-lg text-white">Estudio de Entrenamiento Autónomo</h2>
-          <p class="text-xs text-slate-400 mt-1">Pega tus textos con el formato <code class="text-indigo-400 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">Usuario: ... \nAgerbot: ...</code>. Se mezclarán automáticamente con el corpus de Agerbot principal.</p>
+          <p class="text-xs text-slate-400 mt-1">Pega diálogos <code class="text-indigo-400 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">Usuario: ... / Agerbot: ...</code> (si pegas texto suelto, se convierte solo). Se entrena el mismo Agerbot: aprende el patrón, no memoriza el pegado. El tamaño del modelo no crece.</p>
         </div>
         <button onclick="insertTemplate()" class="text-xs text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1.5 rounded-lg transition font-medium">
           📋 Insertar Ejemplo
@@ -135,7 +135,7 @@ WEB_UI_HTML = """<!DOCTYPE html>
           placeholder="Usuario: Hola&#10;Agerbot: ¡Hola! ¿En qué te ayudo hoy?&#10;&#10;Usuario: ¿Cuál es la mejor estrategia de contenido?&#10;Agerbot: Para mí, la mejor estrategia es..."
           class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl p-4 text-xs text-slate-200 placeholder-slate-600 font-mono outline-none transition leading-relaxed resize-y"
         ></textarea>
-        <p id="trainingBaseInfo" class="text-[11px] text-slate-500 mt-2">Los pesos y el tokenizador se conservarán; la ventana puede ampliarse a 1024 con lotes pequeños.</p>
+        <p id="trainingBaseInfo" class="text-[11px] text-slate-500 mt-2">Mismo Agerbot, mismos ~11M parámetros. Cambia el corpus y la pérdida, no el peso del archivo.</p>
       </div>
 
       <!-- Training Settings Grid -->
@@ -150,17 +150,17 @@ WEB_UI_HTML = """<!DOCTYPE html>
             <option value="30">🔥 30 Minutos (Máxima Convergencia)</option>
             <option value="120">🧠 2 Horas (Entrenamiento Acumulativo Profundo)</option>
           </select>
-          <p class="text-[11px] text-slate-500 mt-1">El contexto puede ampliarse a 1024 con lotes pequeños; el modelo conserva un tamaño compacto.</p>
+          <p class="text-[11px] text-slate-500 mt-1">Al terminar, pregunta en el chat con otras palabras para ver si entendió.</p>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5">🏷️ Nombre de la Versión (Opcional):</label>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">🏷️ Nota (opcional, sigue siendo Agerbot):</label>
           <input 
             id="trainModelName" 
             type="text" 
-            placeholder="ej: mi_version_creativa" 
+            placeholder="ej: cocina, chistes, letras" 
             class="w-full bg-slate-950 border border-slate-800 text-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-indigo-500 placeholder-slate-600 font-mono"
           />
-          <p class="text-[11px] text-slate-500 mt-1">Se guardará automáticamente en <code class="text-slate-400">checkpoints/</code>.</p>
+          <p class="text-[11px] text-slate-500 mt-1">No crea otro modelo. Queda en <code class="text-slate-400">checkpoints/agerbot</code>.</p>
         </div>
       </div>
 
@@ -171,7 +171,7 @@ WEB_UI_HTML = """<!DOCTYPE html>
           onclick="startTraining()" 
           class="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 disabled:opacity-50 text-white font-bold text-sm py-3.5 rounded-xl transition flex items-center justify-center space-x-2 shadow-lg shadow-indigo-500/20"
         >
-          <span>🚀 Iniciar Entrenamiento Automático</span>
+          <span>🚀 Entrenar Agerbot con estos diálogos</span>
         </button>
       </div>
     </div>
