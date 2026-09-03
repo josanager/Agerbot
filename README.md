@@ -82,6 +82,18 @@ Ejecuta las pruebas:
 uv run python -m unittest discover -s tests
 ```
 
+
+## Studio (chat + entrenar)
+
+Arranca el runtime local y abre `http://127.0.0.1:4318`. En **Entrenar Modelo**
+pega diálogos `Usuario:` / `Agerbot:` (o texto suelto: se envuelve solo).
+Se entrena el mismo Agerbot, sin crear otro modelo y sin aumentar parámetros.
+Cuando termine, pregunta en el chat con otras palabras para ver si entendió.
+
+```bash
+uv run agerbot-serve --checkpoint checkpoints/agerbot/best.pt
+```
+
 ## Usar tus propios datos
 
 Coloca uno o varios archivos `.txt` UTF-8 en `data/raw/` y cambia `data_path` en
