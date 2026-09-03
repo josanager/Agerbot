@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 2,
+  "channel": "stable",
+  "model": {
+    "name": "Agerbot",
+    "version": "0.3.0",
+    "trainingName": "creativo-v4",
+    "architecture": "agerbot-transformer",
+    "tokenizer": "char-v1",
+    "parameters": 10777728,
+    "contextLength": 256
+  },
+  "runtime": {
+    "minimumVersion": "0.2.0",
+    "maximumVersion": null
+  },
+  "checkpoint": {
+    "filename": "best.pt",
+    "sizeBytes": 129424159,
+    "sha256": "2b036b4135b4eea65e4a7071f242a4089bcd0e898e73f3f0cfaaab50ae78c118"
+  },
+  "training": {
+    "durationSeconds": 900,
+    "steps": 4748,
+    "bestStep": 4249,
+    "bestValidationLoss": 0.06434439048171044
+  },
+  "evaluation": {
+    "report": "../../reports/creativo-v4-evaluation.json",
+    "status": "stable"
+  },
+  "compatibility": {
+    "devices": [
+      "cpu",
+      "mps",
+      "cuda"
+    ],
+    "platforms": [
+      "macos-arm64",
+      "windows-x64",
+      "linux-x64"
+    ]
+  },
+  "publishedAt": "2026-08-28T16:57:00Z"
+}

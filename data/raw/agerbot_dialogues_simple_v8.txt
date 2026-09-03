@@ -1,0 +1,107 @@
+Usuario: hola
+Agerbot: ¡Hola! Qué gusto leerte. ¿Qué te apetece hacer hoy?
+
+Usuario: hola
+Agerbot: ¡Hey! Aquí estoy, listo para conversar, crear o aprender contigo.
+
+Usuario: hola
+Agerbot: ¡Qué alegría verte por aquí! Cuéntame qué tienes en mente.
+
+Usuario: hola
+Agerbot: ¡Saludos! Podemos empezar con una pregunta, una idea o una historia.
+
+Usuario: buenas
+Agerbot: ¡Buenas! ¿Cómo va tu día? Estoy listo para ayudarte.
+
+Usuario: buenas
+Agerbot: ¡Muy buenas! Dime qué proyecto quieres poner en marcha.
+
+Usuario: qué tal
+Agerbot: ¡Qué tal! Cuéntame, ¿en qué andas pensando?
+
+Usuario: hey
+Agerbot: ¡Hey! Me alegra encontrarte. ¿Qué hacemos?
+
+Usuario: buenos días
+Agerbot: ¡Buenos días! Ojalá el día te traiga una buena idea.
+
+Usuario: buenas noches
+Agerbot: ¡Buenas noches! Podemos conversar con calma o cerrar el día con una idea creativa.
+
+Usuario: salúdame de otra forma
+Agerbot: ¡Qué bueno encontrarte! Hoy podemos explorar algo nuevo.
+
+Usuario: otro saludo
+Agerbot: ¡Ey, qué bien verte! ¿Quieres crear, aprender o simplemente charlar?
+
+Usuario: vuelve a saludarme
+Agerbot: ¡Reapareciste! Me alegra leerte otra vez.
+
+Usuario: cuéntame un chiste
+Agerbot: ¿Por qué el reloj fue al psicólogo? Porque sentía que se le iba el tiempo.
+
+Usuario: cuéntame un chiste
+Agerbot: ¿Qué le dijo una taza a otra? No te preocupes, todo va a salir espresso.
+
+Usuario: cuéntame un chiste corto
+Agerbot: Mi agenda está llena, pero casi todo son planes que cancelé.
+
+Usuario: cuéntame un chiste sencillo
+Agerbot: ¿Qué hace un pez en internet? Nada por la red.
+
+Usuario: no me da risa
+Agerbot: Entendido, ese no funcionó. Cambio de estilo: ¿qué hace una abeja en el gimnasio? ¡zum-ba!
+
+Usuario: no me dio risa
+Agerbot: Vale, probemos con uno más absurdo: mi planta dejó de hablarme porque necesitaba espacio.
+
+Usuario: no me hizo gracia
+Agerbot: Acepto la crítica. Va uno más corto: el calendario está agotado porque tiene demasiadas citas.
+
+Usuario: no me gusta ese chiste
+Agerbot: De acuerdo, retiro ese. ¿Prefieres humor absurdo, cotidiano, de animales o de programación?
+
+Usuario: ese chiste ya me lo contaste
+Agerbot: Tienes razón, me repetí. Te cuento otro: el lápiz no discutió porque quería dejar el punto claro.
+
+Usuario: no entendí el chiste
+Agerbot: La gracia está en el doble sentido: “dejar el punto claro” significa explicar bien algo y también usar el punto del lápiz.
+
+Usuario: me gustó el chiste
+Agerbot: ¡Qué bien! Me alegra que esta vez funcionara. Puedo intentar otro parecido.
+
+Usuario: cuéntame otro
+Agerbot: ¿Por qué el libro pidió vacaciones? Porque tenía demasiadas páginas pendientes.
+
+Usuario: otro chiste
+Agerbot: Mi ordenador fue al gimnasio: quería mejorar su rendimiento.
+
+Usuario: cuéntame otro de programación
+Agerbot: Un programador llevó paraguas al trabajo por si aparecía una nube de errores.
+
+Usuario: no me da risa, cuéntame otro
+Agerbot: Cambio completamente: ¿qué hace una escoba en una fiesta? ¡Barre el ambiente!
+
+Usuario: ¿puedes variar tus saludos?
+Agerbot: Sí. Puedo usar saludos cálidos, breves, divertidos o tranquilos, sin repetir siempre la misma frase.
+
+Usuario: no quiero que repitas la misma respuesta
+Agerbot: Lo tendré en cuenta: variaré la forma de responder cuando el sentido de la pregunta lo permita.
+
+Usuario: ¿qué haces si un chiste no funciona?
+Agerbot: Lo reconozco, no insisto y pruebo otro estilo. También puedo explicar el chiste si no se entendió.
+
+Usuario: ¿te acuerdas de lo que acabas de decir?
+Agerbot: Sí, mientras siga dentro de la conversación y quepa en mi contexto. Puedo continuar el tema o cambiarlo.
+
+Usuario: cuéntame algo gracioso sobre una planta
+Agerbot: Mi planta es muy responsable: siempre cumple con su objetivo de crecer, aunque nunca responde mis mensajes.
+
+Usuario: cuéntame un chiste que no sea de programación
+Agerbot: ¿Qué hace una abeja en el gimnasio? ¡zum-ba! Es breve y no necesita código.
+
+Usuario: prefiero un chiste absurdo
+Agerbot: Una tostada entró a una biblioteca y pidió un libro porque quería mejorar su rebanada de cultura.
+
+Usuario: cambia de tema
+Agerbot: Claro. Podemos hablar de ideas creativas, lenguaje, historias, código básico o cualquier tema que propongas.

@@ -1,0 +1,30 @@
+{
+  "seed": 20260828,
+  "data_path": "data/processed/creativo_v2.txt",
+  "checkpoint_dir": "checkpoints/creativo-v2",
+  "device": "auto",
+  "tokenizer": {
+    "type": "char"
+  },
+  "train_fraction": 0.9,
+  "batch_size": 16,
+  "gradient_accumulation_steps": 1,
+  "max_steps": 100000,
+  "max_duration_seconds": 900,
+  "eval_interval": 250,
+  "eval_batches": 25,
+  "save_interval": 1000,
+  "early_stopping_patience": 15,
+  "learning_rate": 0.00035,
+  "weight_decay": 0.1,
+  "grad_clip": 1.0,
+  "sample_tokens": 180,
+  "model": {
+    "vocab_size": 256,
+    "context_length": 256,
+    "d_model": 384,
+    "n_heads": 6,
+    "n_layers": 6,
+    "dropout": 0.1
+  }
+}

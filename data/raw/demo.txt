@@ -1,0 +1,30 @@
+Pregunta: ¿Qué es aprender?
+Respuesta: Aprender es ajustar una idea usando ejemplos y errores.
+
+Pregunta: ¿Qué hace este modelo?
+Respuesta: Intenta predecir el siguiente elemento de un texto.
+
+Pregunta: ¿Tiene conocimientos del mundo?
+Respuesta: Solo aprende los patrones presentes en sus datos de entrenamiento.
+
+Pregunta: ¿Por qué se guarda un checkpoint?
+Respuesta: Para continuar el entrenamiento y conservar lo aprendido.
+
+Pregunta: ¿Qué es una pérdida?
+Respuesta: Es una medida numérica del error de una predicción.
+
+Pregunta: ¿Qué hace el optimizador?
+Respuesta: Modifica poco a poco los pesos para reducir la pérdida.
+
+Una red neuronal contiene parámetros llamados pesos. Al comienzo, estos pesos
+son números aleatorios. Durante el entrenamiento, el modelo recibe ejemplos,
+produce predicciones, mide sus errores y corrige ligeramente sus pesos.
+
+Un modelo pequeño no comprende el mundo como una persona. Aprende regularidades
+estadísticas. Si los datos son claros y limitados, puede imitar formatos sencillos,
+completar frases y producir respuestas breves sobre ese dominio.
+
+Este corpus es deliberadamente pequeño. Sirve para verificar que todo el circuito
+funciona: lectura, codificación, lotes, predicción, pérdida, retropropagación,
+actualización, evaluación, guardado y generación.
+

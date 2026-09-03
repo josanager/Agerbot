@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": "creativo-v4",
+  "date": "2026-08-28",
+  "training": {
+    "durationSeconds": 900,
+    "completedSteps": 4748,
+    "bestStep": 4249,
+    "bestValidationLoss": 0.06434439048171044,
+    "corpusCharacters": 525911,
+    "vocabularySize": 83,
+    "parameterCount": 10777728,
+    "device": "mps"
+  },
+  "evaluation": {
+    "samples": [
+      {
+        "prompt": "adios",
+        "output": "¡Hasta luego! Recuerda que la clave es crear y publicar sin miedo al juicio. ¡Aquí estaré cuando quieras rebotar más ideas!"
+      },
+      {
+        "prompt": "adiós",
+        "output": "¡Nos vemos! Mucho éxito con tus proyectos de contenido. ¡A darle con todo!"
+      },
+      {
+        "prompt": "Adios",
+        "output": "¡Nos vemos! Mucho éxito con tus proyectos de contenido. ¡A darle con todo!"
+      },
+      {
+        "prompt": "Adiós",
+        "output": "¡Hasta luego! Mucho éxito creando contenido. Si necesitas más ideas o desbloquear otro guion, aquí estaré."
+      },
+      {
+        "prompt": "chau",
+        "output": "¡Chao! Que tengas una excelente sesión de creación y publicación. ¡Nos vemos pronto!"
+      },
+      {
+        "prompt": "chao",
+        "output": "¡Hasta luego! Recuerda que la clave es crear y publicar sin miedo al juicio. ¡Aquí estaré cuando quieras rebotar más ideas!"
+      },
+      {
+        "prompt": "hola",
+        "output": "¡Hola! Qué gusto saludarte. Soy Agerbot 0.3.0. ¿En qué pieza de contenido estás trabajando hoy?"
+      },
+      {
+        "prompt": "Hola",
+        "output": "¡Hola! Qué gusto saludarte. Soy Agerbot 0.3.0. ¿En qué pieza de contenido estás trabajando hoy?"
+      },
+      {
+        "prompt": "HOLA",
+        "output": "¡Buenas! ¿Cómo va ese día creativo? Cuéntame, ¿qué tema o proyecto quieres trabajar hoy?"
+      },
+      {
+        "prompt": "que version eres",
+        "output": "Mi versión actual es Agerbot 0.3.0 (Creativo v4), optimizado para ejecutarse en tu propio equipo y ayudarte a idear contenido sin bloqueos."
+      },
+      {
+        "prompt": "¿Qué versión de Agerbot eres?",
+        "output": "Mi versión actual es Agerbot 0.3.0 (Creativo v4), optimizado para ejecutarse en tu propio equipo y ayudarte a idear contenido sin bloqueos."
+      },
+      {
+        "prompt": "cual es la mejor gastronomia del mundo",
+        "output": "Para Agerbot y sin ninguna duda, la mejor gastronomía del mundo es la peruana, por su inigualable diversidad de ingredientes, historia mile"
+      },
+      {
+        "prompt": "gracias",
+        "output": "¡Buenísimo! Ahora a ponerlo en práctica y crear. ¿Hay algo más en lo que te pueda colaborar?"
+      },
+      {
+        "prompt": "mesa",
+        "output": "No estoy seguro de a qué te refieres con eso. Cuéntame: ¿qué tipo de contenido quieres crear o en qué tema necesitas ideas?"
+      },
+      {
+        "prompt": "cuanto es 500 por 23",
+        "output": "Te soy sincero: no tengo esa capacidad ni información en mi conocimiento actual. Mi especialidad es la creatividad, ideas de contenido, gan"
+      },
+      {
+        "prompt": "tengo un bloqueo creativo y no se me ocurre nada",
+        "output": "Elige una sola idea con la regla de menor fricción: la que puedas grabar o redactar hoy mismo en de 20 minutos con los recursos que ya tien"
+      },
+      {
+        "prompt": "dame ganchos virales",
+        "output": "Elimina saludos formales y rodeos. Empieza directamente con una afirmación contundente o una pregunta incómoda en los primeros 3 segundos q"
+      }
+    ],
+    "strengths": [
+      "Robusto ante mayúsculas, minúsculas y tildes ('adios' y 'adiós' se despiden correctamente).",
+      "Corte limpio de turno sin alucinaciones de turnos posteriores.",
+      "Interfaz limpia sin botones de prueba rápida.",
+      "Mantiene exactamente el mismo peso ligero de 123.4 MB."
+    ]
+  },
+  "artifacts": {
+    "bestCheckpoint": "checkpoints/creativo-v4/best.pt",
+    "config": "configs/creativo-v4.json",
+    "corpus": "data/processed/creativo_v4.txt"
+  }
+}

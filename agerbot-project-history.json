@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "name": "Agerbot",
+    "spelling": "A-G-E-R-B-O-T",
+    "mission": "Construir una IA abierta, gratuita, local-first y comunitaria, optimizada desde su origen para equipos de consumo.",
+    "messagingApplication": "MISIL",
+    "relationship": "Agerbot es el modelo y runtime de IA; MISIL será la interfaz de conversación, instalación opcional y futura coordinación de nodos.",
+    "currentDomain": "Desbloqueo creativo y creación de contenido",
+    "longTermArchitecture": "IA multimodal modular capaz de comprender y generar texto, imágenes, audio y video."
+  },
+  "hardware": {
+    "primary": {
+      "platform": "macOS",
+      "device": "MacBook Pro M1 Pro",
+      "memoryGB": 16,
+      "accelerator": "Apple MPS",
+      "plannedRole": "Coordinador, inferencia, evaluación y entrenamiento"
+    },
+    "secondary": {
+      "platform": "Windows",
+      "memoryGB": 16,
+      "accelerator": "NVIDIA RTX 3050 Laptop, aproximadamente 4 GB de VRAM",
+      "plannedRole": "Trabajador CUDA y réplica de checkpoints"
+    }
+  },
+  "decisions": [
+    {"id": "D-001", "decision": "Entrenar Agerbot desde pesos aleatorios con PyTorch y operaciones portables entre MPS, CUDA y CPU."},
+    {"id": "D-002", "decision": "La primera especialización será exclusivamente gastronomía peruana."},
+    {"id": "D-003", "decision": "MISIL instalará Agerbot opcionalmente; ambos seguirán siendo componentes separados."},
+    {"id": "D-004", "decision": "La beta inicial estará limitada a aproximadamente 20 familiares y amigos; el cifrado de extremo a extremo y la privacidad federada avanzada quedan pospuestos."},
+    {"id": "D-005", "decision": "Los datos financieros, contraseñas, credenciales y otros secretos deben excluirse del entrenamiento incluso durante la beta."},
+    {"id": "D-006", "decision": "La primera red de prueba usará Mac y Windows; comenzará con entrenamiento asíncrono y dejará model parallelism como experimento posterior."},
+    {"id": "D-007", "decision": "El entrenamiento v2 tendrá un presupuesto máximo de pared de 15 minutos y conservará el checkpoint con mejor validación."},
+    {"id": "D-008", "decision": "Agerbot se diseñará como sistema multimodal desde sus contratos y manifiestos, aunque su primera capacidad implementada sea texto."},
+    {"id": "D-009", "decision": "Agerbot deberá comprender entradas de texto, imagen, audio y video, incluidos los archivos compartidos mediante MISIL cuando el usuario autorice su análisis."},
+    {"id": "D-010", "decision": "Agerbot deberá generar texto, voz y audio, imágenes y video mediante módulos especializados coordinados por un núcleo común."},
+    {"id": "D-011", "decision": "La multimodalidad inicial será modular y versionada; no se intentará entrenar inmediatamente un único modelo monolítico para todas las modalidades."},
+    {"id": "D-012", "decision": "Los checkpoints se distribuirán como assets de GitHub Releases y nunca como archivos normales de Git; el código fuente seguirá en el repositorio."},
+    {"id": "D-013", "decision": "Solo una publicación explícita puede promover un modelo evaluado a stable; MISIL no instalará training, candidate, rejected ni superseded."},
+    {"id": "D-014", "decision": "MISIL verificará y probará cada modelo en un proceso aislado, lo activará atómicamente y restaurará la versión anterior si falla."}
+  ],
+  "history": [
+    {
+      "date": "2026-08-25",
+      "event": "Se creó el esqueleto PyTorch portable de Agerbot con transformer autoregresivo byte-level, entrenamiento, checkpoints y generación.",
+      "result": "Validado en MPS y CPU; 3.257.856 parámetros."
+    },
+    {
+      "date": "2026-08-25",
+      "event": "Se creó el corpus v1 de gastronomía peruana y se entrenó Agerbot v1.",
+      "result": "Parada automática en el paso 2.500; mejor validación en el paso 500; generación todavía incoherente."
+    },
+    {
+      "date": "2026-08-25",
+      "event": "Se auditó MISIL en modo lectura.",
+      "result": "MISIL tiene clientes nativos SwiftUI y WPF, nodo local Node.js y Hub WebSocket; todavía no integra Agerbot ni ofrece cifrado de extremo a extremo."
+    },
+    {
+      "date": "2026-08-25",
+      "event": "Se inició la preparación de Agerbot v2.",
+      "result": "Objetivo: mejorar tokenización y corpus, entrenar durante un máximo de 900 segundos y evaluar preguntas reservadas."
+    },
+    {
+      "date": "2026-08-25",
+      "event": "Se amplió el corpus v2 a 270.366 caracteres usando 78 pares factuales y variaciones deterministas.",
+      "result": "Se adoptó tokenización por caracteres con vocabulario de 72 símbolos y un transformer de 10.773.504 parámetros."
+    },
+    {
+      "date": "2026-08-25",
+      "event": "Se entrenó Agerbot gastronomía peruana v2 durante el límite completo de 900 segundos.",
+      "result": "Finalizó correctamente en el paso 5.948; el mejor checkpoint fue el paso 4.500 con pérdida de validación 0,0855."
+    },
+    {
+      "date": "2026-08-25",
+      "event": "Se evaluó Agerbot v2 con 20 preguntas reservadas mediante decodificación determinista.",
+      "result": "4 respuestas correctas, 3 parciales y 13 incorrectas. El lenguaje es legible, pero la recuperación de conocimiento aún no es robusta."
+    },
+    {
+      "date": "2026-08-25",
+      "event": "Se amplió la visión de Agerbot para convertirlo en una IA multimodal.",
+      "result": "La hoja de ruta incluye comprensión y generación de texto, imágenes, audio y video, con archivos de MISIL como futuras entradas autorizadas."
+    },
+    {
+      "date": "2026-08-25",
+      "event": "Se actualizó el runtime Agerbot a 0.2.0 y se integró gastronomia-peruana-v2 en MISIL.",
+      "result": "El servidor admite checkpoints byte-v1 y char-v1, valida vocabulario y parámetros finitos, y MISIL selecciona automáticamente 0.2.0 por manifiesto y SemVer."
+    },
+    {
+      "date": "2026-08-25",
+      "event": "Se implementó el ciclo verificable de actualización de modelos en MISIL.",
+      "result": "Incluye consulta de GitHub Releases, descarga reanudable, SHA-256, prueba aislada, activación atómica, conservación del modelo anterior y rollback. La API pública todavía devuelve 404 porque no existe una release real."
+    },
+    {
+      "date": "2026-08-28",
+      "event": "Se entrenó Agerbot Creativo v5 (25 minutos en Apple Silicon MPS) con voz 100% en primera persona y memoria multi-turno.",
+      "result": "Corpus de 237.545 caracteres con diálogos multi-turno encadenados. Completó 7.920 pasos con pérdida de validación récord de 0,0549. Habla en primera persona ('Para mí...'), mantiene hilación contextual en cadenas largas y conserva exactamente los 123.4 MB de peso."
+    }
+  ],
+  "multimodalRoadmap": {
+    "principle": "Mantener un núcleo coordinador pequeño y portable, acompañado por codificadores, decodificadores y generadores especializados que puedan instalarse de forma opcional según el hardware.",
+    "inputModalities": [
+      "text",
+      "image",
+      "audio",
+      "video"
+    ],
+    "outputModalities": [
+      "text",
+      "speech",
+      "audio",
+      "image",
+      "video"
+    ],
+    "implementationOrder": [
+      "Texto estable y conversación en MISIL",
+      "Análisis de imágenes",
+      "Transcripción y comprensión de audio",
+      "Comprensión de video mediante fotogramas y audio",
+      "Síntesis de voz",
+      "Generación de imágenes",
+      "Generación de audio",
+      "Generación de video"
+    ],
+    "misilIntegration": {
+      "goal": "Permitir que el usuario envíe archivos a Agerbot desde una conversación local y reciba análisis o contenido generado.",
+      "requirements": [
+        "Mensajes con adjuntos y tipos MIME",
+        "API local multimodal",
+        "Límites de tamaño y duración",
+        "Procesamiento por tareas cancelables",
+        "Detección automática de capacidades del equipo",
+        "Descarga opcional de módulos por modalidad",
+        "Manifiestos que declaren modalidades de entrada y salida"
+      ]
+    }
+  },
+  "currentState": {
+    "stableCheckpoint": "checkpoints/creativo-v5/best.pt",
+    "stableQuality": "Voz 100% en primera persona ('Para mí...', 'Yo...'), hilación multi-turno continua, tolerancia a repreguntas y fallbacks honestos.",
+    "activeVersion": "0.3.0",
+    "runtimeVersion": "0.2.0",
+    "activeWork": "Agerbot creativo-v5 finalizado con éxito, probado en cadenas de 9 turnos y desplegado en 127.0.0.1:4318.",
+    "releaseStatus": "model-v0.3.0 listo para uso local.",
+    "nextMilestone": "Evaluación con usuarios reales en MISIL y soporte multimodal."
+  }
+}

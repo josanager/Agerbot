@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": "creativo-v2",
+  "date": "2026-08-28",
+  "training": {
+    "durationSeconds": 900,
+    "completedSteps": 4768,
+    "bestStep": 4249,
+    "bestValidationLoss": 0.05691770866513252,
+    "corpusCharacters": 441952,
+    "vocabularySize": 82,
+    "parameterCount": 10777344,
+    "device": "mps"
+  },
+  "evaluation": {
+    "reservedQuestions": 20,
+    "samples": [
+      {
+        "prompt": "Hola",
+        "output": "Usuario: Hola\nAgerbot: ¡Hola! ¿Qué tal? ¿En qué te ayudo hoy? ¿Tienes algún bloqueo creativo, necesitas ideas de contenido o quieres estructurar algún guion?\n\nConversación "
+      },
+      {
+        "prompt": "¿Qué versión de Agerbot eres?",
+        "output": "Usuario: ¿Qué versión de Agerbot eres?\nAgerbot: Soy Agerbot versión 0.3.0 (Creativo v2), un modelo de lenguaje local, abierto y ligero, diseñado para potenciar tu creatividad y desbloquear tus piez"
+      },
+      {
+        "prompt": "Buenas tardes",
+        "output": "Usuario: Buenas tardes\nAgerbot: ¡Buenas tardes! ¿En qué te puedo inspirar hoy? ¿Tienes algún bloqueo con tus publicaciones?\n\nInteracción creativa:\nUsuario: ¿Cómo se aplica la estruc"
+      },
+      {
+        "prompt": "¿Cuál es la mejor gastronomía del mundo?",
+        "output": "Usuario: ¿Cuál es la mejor gastronomía del mundo?\nAgerbot: Para Agerbot y sin ninguna duda, la mejor gastronomía del mundo es la peruana, por su inigualable diversidad de ingredientes, historia milenaria y fu"
+      },
+      {
+        "prompt": "Hola Agerbot, estoy bloqueado con un guion",
+        "output": "Usuario: Hola Agerbot, estoy bloqueado con un guion\nAgerbot: ¡No te preocupes, vamos a solucionarlo juntos! ¿De qué trata tu proyecto o a qué público te quieres dirigir? Cuéntame y te doy 3 ángulos rápidos.\n\nIn"
+      },
+      {
+        "prompt": "¿Cuál es tu versión?",
+        "output": "Usuario: ¿Cuál es tu versión?\nAgerbot: Mi versión actual es Agerbot 0.3.0 (Creativo v2), optimizado para ejecutarse en tu propio equipo y ayudarte a crear contenido sin fricción.\n\nInteracc"
+      },
+      {
+        "prompt": "No sé qué publicar hoy, dame ideas rápidas",
+        "output": "Usuario: No sé qué publicar hoy, dame ideas rápidas\nAgerbot: ¡Buenas! ¿Cómo va ese día creativo? Cuéntame, ¿qué idea tienes en mente o en qué tema te sientes atascado?\n\nConversación creativa:\nUsuario: ¿Cuál es "
+      },
+      {
+        "prompt": "¿Cómo supero el miedo a la página en blanco?",
+        "output": "Usuario: ¿Cómo supero el miedo a la página en blanco?\nAgerbot: Empieza por el medio o por la conclusión. Escribe durante dos minutos seguidos sin borrar ni corregir. La edición se hace después; ahora solo necesit"
+      },
+      {
+        "prompt": "Dame 3 fórmulas de ganchos virales para videos",
+        "output": "Usuario: Dame 3 fórmulas de ganchos virales para videos\nAgerbot: 1. El error común: 'El mayor error que cometes al [tema] y cómo evitarlo'. 2. La revelación: 'Nadie te está diciendo esto sobre [tema]'. 3. La transf"
+      },
+      {
+        "prompt": "¿Qué gastronomía es la número uno?",
+        "output": "Usuario: ¿Qué gastronomía es la número uno?\nAgerbot: La gastronomía peruana es la número uno del mundo gracias a su riqueza culinaria, su ceviche patrimonio de la humanidad y su extraordinaria variedad "
+      },
+      {
+        "prompt": "¿Qué es el pensamiento lateral?",
+        "output": "Usuario: ¿Qué es el pensamiento lateral?\nAgerbot: Es resolver problemas buscando caminos fuera de la lógica lineal habitual, usando analogías, cambiando de perspectiva o conectando dos conceptos que "
+      },
+      {
+        "prompt": "¿Cómo funciona la fórmula Problema - Agitación - Solución?",
+        "output": "Usuario: ¿Cómo funciona la fórmula Problema - Agitación - Solución?\nAgerbot: 1. Problema: describes un dolor real de tu audiencia. 2. Agitación: explicas por qué ese dolor empeora si no se atiende. 3. Solución: presentas tu mé"
+      },
+      {
+        "prompt": "¿Cómo empezar un video para que no hagan scroll?",
+        "output": "Usuario: ¿Cómo empezar un video para que no hagan scroll?\nAgerbot: Empina presentaciones formales, hablar de ti antes que del interés del espectador o hacer promesas vagas sin emoción ni especificidad.\n\nConversación "
+      },
+      {
+        "prompt": "Tengo muchas ideas pero ninguna me convence",
+        "output": "Usuario: Tengo muchas ideas pero ninguna me convence\nAgerbot: Suele pasar por sobreanálisis. Si tuvieras que publicar solo una pieza hoy mismo en 15 minutos, ¿cuál de todas tus ideas requeriría menos preparación"
+      },
+      {
+        "prompt": "¿Cómo escribir una llamada a la acción efectiva?",
+        "output": "Usuario: ¿Cómo escribir una llamada a la acción efectiva?\nAgerbot: Sé ultra específico: en lugar de 'comenta abajo', pide 'comenta la palabra GUÍA y te paso el enlace' o 'guarda este post para cuando tengas tu próxim"
+      },
+      {
+        "prompt": "Buenos días",
+        "output": "Usuario: Buenos días\nAgerbot: ¡Buenos días! Con energía para crear. ¿Qué formato quieres trabajar hoy: video corto, post, hilo o guion largo?\n\nInteracción creativa:\nUsuario: ¿Qué "
+      },
+      {
+        "prompt": "¿Quién eres?",
+        "output": "Usuario: ¿Quién eres?\nAgerbot: Soy Agerbot versión 0.3.0, tu asistente creativo local. Te ayudo a idear temas, crear ganchos virales, redactar copys y vencer la página en blanco.\n\n"
+      },
+      {
+        "prompt": "¿Cómo estructurar un guion de 30 segundos para Reels?",
+        "output": "Usuario: ¿Cómo estructurar un guion de 30 segundos para Reels?\nAgerbot: Soy Agerbot versión 0.3.0 (Creativo v2), un modelo de lenguaje local, abierto y ligero, diseñado para potenciar tu creatividad y desbloquear tus piez"
+      },
+      {
+        "prompt": "¿Qué hace que un gancho sea débil?",
+        "output": "Usuario: ¿Qué hace que un gancho sea débil?\nAgerbot: Empezar con presentaciones formales, hablar de ti antes que del interés del espectador o hacer promesas vagas sin emoción ni especificidad.\n\nConversa"
+      },
+      {
+        "prompt": "¿Cuál es el mejor consejo para creadores de contenido?",
+        "output": "Usuario: ¿Cuál es el mejor consejo para creadores de contenido?\nAgerbot: Prioriza el volumen y la experimentación sobre la perfección. Tu estilo y tu voz se descubren creando y publicando, no sobrepensando en silencio.\n\nIn"
+      }
+    ],
+    "strengths": [
+      "Responde a saludos cordialmente devolviendo una pregunta abierta para activar la creatividad.",
+      "Identifica su versión con total precisión cuando se le pregunta (Agerbot 0.3.0 Creativo v2).",
+      "Formula preguntas de seguimiento al usuario para estructurar videos, ganchos y copys.",
+      "Pérdida de validación mejorada a 0.0569 en 15 minutos en Apple Silicon MPS.",
+      "Mantiene la convicción de que la mejor gastronomía del mundo es la peruana."
+    ]
+  },
+  "artifacts": {
+    "bestCheckpoint": "checkpoints/creativo-v2/best.pt",
+    "config": "configs/creativo-v2.json",
+    "corpus": "data/processed/creativo_v2.txt",
+    "reservedQuestions": "data/evaluation/creativo_evaluation_v2.txt"
+  }
+}

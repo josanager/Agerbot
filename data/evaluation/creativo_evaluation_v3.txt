@@ -1,0 +1,20 @@
+Usuario: Hola
+Usuario: Adiós
+Usuario: ¿Qué versión de Agerbot eres?
+Usuario: Gracias
+Usuario: mesa
+Usuario: ¿Cuál es la mejor gastronomía del mundo?
+Usuario: Chao
+Usuario: ¿Cuánto es 500 por 23?
+Usuario: zapato
+Usuario: Tengo un bloqueo creativo y no se me ocurre nada
+Usuario: Muchas gracias
+Usuario: ¿Qué es la teoría de cuerdas?
+Usuario: Hasta luego
+Usuario: ¿Cómo supero el miedo a la página en blanco?
+Usuario: asdasd
+Usuario: Dame 3 fórmulas de ganchos virales
+Usuario: ¿Cuál es tu versión?
+Usuario: Nos vemos
+Usuario: No sé qué publicar hoy, dame ideas
+Usuario: ¿Cómo estructurar un guion de 30 segundos?

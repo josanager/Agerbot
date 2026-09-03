@@ -1,0 +1,25 @@
+{
+  "seed": 1337,
+  "data_path": "data/raw/demo.txt",
+  "checkpoint_dir": "runs/smoke/checkpoints",
+  "device": "auto",
+  "train_fraction": 0.9,
+  "batch_size": 2,
+  "gradient_accumulation_steps": 1,
+  "max_steps": 2,
+  "eval_interval": 1,
+  "eval_batches": 1,
+  "save_interval": 2,
+  "learning_rate": 0.0003,
+  "weight_decay": 0.1,
+  "grad_clip": 1.0,
+  "sample_tokens": 20,
+  "model": {
+    "vocab_size": 256,
+    "context_length": 16,
+    "d_model": 64,
+    "n_heads": 4,
+    "n_layers": 2,
+    "dropout": 0.0
+  }
+}

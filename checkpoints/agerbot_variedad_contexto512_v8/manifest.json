@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 2,
+  "channel": "stable",
+  "model": {
+    "name": "Agerbot",
+    "version": "custom",
+    "trainingName": "agerbot_variedad_contexto512_v8",
+    "architecture": "agerbot-transformer",
+    "tokenizer": "char-v1",
+    "parameters": 10873728,
+    "contextLength": 512
+  },
+  "runtime": {
+    "minimumVersion": "0.2.0",
+    "maximumVersion": null
+  },
+  "checkpoint": {
+    "filename": "best.pt",
+    "sizeBytes": 130575775,
+    "sha256": "7fb2a4a426e862242d846169ef46c8cdb6d1d3dfea0d83476cea9c24b79fc0f6"
+  },
+  "training": {
+    "durationSeconds": 1800,
+    "steps": 4287,
+    "bestValidationLoss": 0.8923651456832886,
+    "mode": "incremental",
+    "baseTrainingName": "agerbot_dialogues_v7_2h",
+    "baseCheckpoint": "/Users/josanestrellaflores/Antigravity/Agerbot/checkpoints/agerbot_dialogues_v7_2h/best.pt",
+    "baseCorpusCharacters": 676678,
+    "newCorpusCharacters": 4153,
+    "mergedCorpusCharacters": 826258
+  },
+  "publishedAt": "2026-08-29T11:45:49Z"
+}

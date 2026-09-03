@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 2,
+  "channel": "stable",
+  "model": {
+    "name": "Agerbot",
+    "version": "custom",
+    "trainingName": "agerbot_razonamiento_contexto1024_v9b",
+    "architecture": "agerbot-transformer",
+    "tokenizer": "char-v1",
+    "parameters": 11070336,
+    "contextLength": 1024
+  },
+  "runtime": {
+    "minimumVersion": "0.2.0",
+    "maximumVersion": null
+  },
+  "checkpoint": {
+    "filename": "best.pt",
+    "sizeBytes": 132935071,
+    "sha256": "457f3c6bfe032bc4669792052205f5676e1951c6ee796a173d1b50c7bcf0cffd"
+  },
+  "training": {
+    "durationSeconds": 1800,
+    "steps": 1581,
+    "bestValidationLoss": 1.441259515285492,
+    "mode": "incremental",
+    "baseTrainingName": "agerbot_variedad_contexto512_v8",
+    "baseCheckpoint": "/Users/josanestrellaflores/Antigravity/Agerbot/checkpoints/agerbot_variedad_contexto512_v8/best.pt",
+    "baseCorpusCharacters": 826258,
+    "newCorpusCharacters": 7054,
+    "mergedCorpusCharacters": 973754
+  },
+  "publishedAt": "2026-08-29T13:23:02Z"
+}

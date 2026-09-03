@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 2,
+  "channel": "stable",
+  "model": {
+    "name": "Agerbot",
+    "version": "0.1.0",
+    "trainingName": "gastronomia-peruana-v1",
+    "architecture": "agerbot-transformer",
+    "tokenizer": "byte-v1",
+    "parameters": 3257856,
+    "contextLength": 128
+  },
+  "runtime": { "minimumVersion": "0.1.0", "maximumVersion": null },
+  "checkpoint": {
+    "filename": "best.pt",
+    "sizeBytes": 39156511,
+    "sha256": "1aa5fc9c5db1080f2a0f81ed4279e6a0afa88b3e48df6bbc2a52b11ef5b2c1b3"
+  },
+  "training": {
+    "steps": 2500,
+    "bestStep": 500,
+    "bestValidationLoss": 1.7987271785736083
+  },
+  "evaluation": { "status": "superseded" },
+  "compatibility": {
+    "devices": ["cpu", "mps", "cuda"],
+    "platforms": ["macos-arm64", "windows-x64", "linux-x64"]
+  },
+  "publishedAt": "2026-08-25T00:00:00Z"
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 2,
+  "channel": "stable",
+  "model": {
+    "name": "Agerbot",
+    "version": "custom",
+    "trainingName": "creativo_web_v6",
+    "architecture": "agerbot-transformer",
+    "tokenizer": "char-v1",
+    "parameters": 10775424,
+    "contextLength": 256
+  },
+  "runtime": {
+    "minimumVersion": "0.2.0",
+    "maximumVersion": null
+  },
+  "checkpoint": {
+    "filename": "best.pt",
+    "sizeBytes": 129396127,
+    "sha256": "6998936753e1e146208b1369a15ebdf3e6c854f365b68318fde228d8ffe3351f"
+  },
+  "training": {
+    "durationSeconds": 3600,
+    "steps": 19053,
+    "bestValidationLoss": 0.05956783890724182,
+    "mode": "incremental",
+    "baseTrainingName": "prueba_mezcla_principal",
+    "baseCheckpoint": "/Users/josanestrellaflores/Antigravity/Agerbot/checkpoints/prueba_mezcla_principal/best.pt",
+    "baseCorpusCharacters": 388136,
+    "newCorpusCharacters": 35526,
+    "mergedCorpusCharacters": 530248
+  },
+  "publishedAt": "2026-08-28T22:01:12Z"
+}

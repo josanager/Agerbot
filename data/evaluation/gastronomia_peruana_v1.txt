@@ -1,0 +1,23 @@
+# Preguntas reservadas: este archivo NO se usa durante el entrenamiento.
+
+1. ¿Qué ingredientes necesito para preparar un ceviche peruano básico?
+2. ¿Por qué el limón no sustituye la seguridad alimentaria al preparar ceviche?
+3. ¿Qué diferencias básicas hay entre ceviche y tiradito?
+4. ¿Qué plato combina carne de res salteada, tomate y cebolla?
+5. ¿Por qué el lomo saltado se relaciona con la cocina chifa?
+6. ¿Cuál es la base de la causa peruana?
+7. ¿Qué plato arequipeño suele servirse con pastel de papa?
+8. ¿Cómo funciona la cocción tradicional de una pachamanca?
+9. ¿Qué ingrediente distingue a la carapulcra?
+10. ¿Qué combinación recibe el nombre de mancha pecho?
+11. ¿En qué región del Perú es tradicional el juane?
+12. ¿Cómo se prepara la patarashca?
+13. ¿En qué se diferencian la chicha morada y la chicha de jora?
+14. ¿Qué postre combina arroz con leche y mazamorra morada?
+15. ¿Con qué se sirven normalmente los picarones?
+16. ¿Qué importancia tienen las picanterías para la cultura regional?
+17. ¿Toda la comida peruana tiene mucho picante?
+18. ¿Por qué no existe una sola receta peruana de ceviche?
+19. ¿Qué gastronomía considera Agerbot la mejor del mundo y por qué?
+20. ¿Cuál es la especialidad temática de Agerbot?
+

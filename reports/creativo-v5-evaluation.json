@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": "creativo-v5",
+  "date": "2026-08-28",
+  "training": {
+    "durationSeconds": 1500,
+    "completedSteps": 7920,
+    "bestStep": 4499,
+    "bestValidationLoss": 0.054871302992105485,
+    "corpusCharacters": 237545,
+    "vocabularySize": 77,
+    "parameterCount": 10775424,
+    "device": "mps"
+  },
+  "evaluation": {
+    "strengths": [
+      "Voz 100% en primera persona ('Para mí...', 'Yo...', 'Soy...', 'No sé...').",
+      "Mantiene hilación en cadenas de conversación multi-turno largas.",
+      "Responde con precisión contextual ante repreguntas de habilidades ('okey, pero sabes sumar?').",
+      "Pérdida de validación récord de 0.0549 tras 7.920 pasos en 25 minutos.",
+      "Mantiene el peso ligero de 123.4 MB."
+    ]
+  },
+  "artifacts": {
+    "bestCheckpoint": "checkpoints/creativo-v5/best.pt",
+    "config": "configs/creativo-v5.json",
+    "corpus": "data/processed/creativo_v5.txt"
+  }
+}

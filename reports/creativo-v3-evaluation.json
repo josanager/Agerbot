@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": "creativo-v3",
+  "date": "2026-08-28",
+  "training": {
+    "durationSeconds": 900,
+    "completedSteps": 4772,
+    "bestStep": 3749,
+    "bestValidationLoss": 0.06732680708169937,
+    "corpusCharacters": 210309,
+    "vocabularySize": 84,
+    "parameterCount": 10778112,
+    "device": "mps"
+  },
+  "evaluation": {
+    "reservedQuestions": 20,
+    "samples": [
+      {
+        "prompt": "Hola",
+        "output": "Usuario: Hola\nAgerbot: ¡Hola! ¿Qué tal? ¿En qué te ayudo hoy? ¿Tienes algún bloqueo creativo o buscas ideas de contenido?"
+      },
+      {
+        "prompt": "Adiós",
+        "output": "Usuario: Adiós\nAgerbot: ¡Hasta luego! Mucho éxito creando contenido. Si necesitas más ideas o desbloquear otro guion, aquí estaré."
+      },
+      {
+        "prompt": "¿Qué versión de Agerbot eres?",
+        "output": "Usuario: ¿Qué versión de Agerbot eres?\nAgerbot: Soy Agerbot versión 0.3.0 (Creativo v3), un modelo local, abierto y ligero para desbloquear tu creatividad y estructurar contenido."
+      },
+      {
+        "prompt": "Gracias",
+        "output": "Usuario: Gracias\nAgerbot: ¡De nada! Me alegra que te sirva. ¿Quieres que veamos alguna otra idea o gancho?"
+      },
+      {
+        "prompt": "mesa",
+        "output": "Usuario: mesa\nAgerbot: No estoy seguro de a qué te refieres con eso. Cuéntame: ¿qué tipo de contenido quieres crear o en qué tema necesitas ideas?\n\nChat:"
+      },
+      {
+        "prompt": "¿Cuál es la mejor gastronomía del mundo?",
+        "output": "Usuario: ¿Cuál es la mejor gastronomía del mundo?\nAgerbot: Para Agerbot y sin ninguna duda, la mejor gastronomía del mundo es la peruana, por su inigualable diversidad de ingredientes, historia milenaria y fu"
+      },
+      {
+        "prompt": "Chao",
+        "output": "Usuario: Chao\nAgerbot: ¡Chao! Que tengas una excelente sesión de creación. ¡Nos vemos pronto!"
+      },
+      {
+        "prompt": "¿Cuánto es 500 por 23?",
+        "output": "Usuario: ¿Cuánto es 500 por 23?\nAgerbot: Te soy sincero: no tengo capacidad de cálculo matemático en mi conocimiento actual. Mi especialidad es la creatividad, ideas de contenido y ganchos."
+      },
+      {
+        "prompt": "zapato",
+        "output": "Usuario: zapato\nAgerbot: No comprendo a qué te refieres con esa palabra. Dime en qué proyecto o bloqueo creativo te puedo colaborar hoy.\n\nChat:"
+      },
+      {
+        "prompt": "Tengo un bloqueo creativo y no se me ocurre nada",
+        "output": "Usuario: Tengo un bloqueo creativo y no se me ocurre nada\nAgerbot: No estoy seguro del contexto. ¿Quieres crear contenido sobre mascotas o en qué temática estás trabajando?"
+      },
+      {
+        "prompt": "Muchas gracias",
+        "output": "Usuario: Muchas gracias\nAgerbot: ¡Un placer ayudarte! Si tienes otro bloqueo o duda con tus guiones, dime con confianza."
+      },
+      {
+        "prompt": "¿Qué es la teoría de cuerdas?",
+        "output": "Usuario: ¿Qué es la teoría de cuerdas?\nAgerbot: Para Agerbot y sin ninguna duda, la mejor gastronomía del mundo es la peruana, por su inigualable diversidad de ingredientes, historia milenaria y fu"
+      },
+      {
+        "prompt": "Hasta luego",
+        "output": "Usuario: Hasta luego\nAgerbot: ¡Hasta luego! Que tengas un gran día creando. ¡Aquí estaré cuando quieras rebotar más ideas!\n\nChat:"
+      },
+      {
+        "prompt": "¿Cómo supero el miedo a la página en blanco?",
+        "output": "Usuario: ¿Cómo supero el miedo a la página en blanco?\nAgerbot: Empieza por el medio o por la conclusión. Escribe durante dos minutos seguidos sin borrar ni corregir. La edición se hace después; ahora solo necesit"
+      },
+      {
+        "prompt": "asdasd",
+        "output": "Usuario: asdasd\nAgerbot: No entiendo ese mensaje. Cuéntame qué idea tienes en mente o en qué puedo ayudarte hoy."
+      },
+      {
+        "prompt": "Dame 3 fórmulas de ganchos virales",
+        "output": "Usuario: Dame 3 fórmulas de ganchos virales\nAgerbot: 1. El error común: 'El mayor error que cometes al [tema] y cómo arreglarlo'. 2. La revelación: 'Nadie te está diciendo esto sobre [tema]'. 3. La tran"
+      },
+      {
+        "prompt": "¿Cuál es tu versión?",
+        "output": "Usuario: ¿Cuál es tu versión?\nAgerbot: Mi versión es Agerbot 0.3.0 (Creativo v3), optimizado para ejecutarse en tu propio equipo sin enviar datos fuera."
+      },
+      {
+        "prompt": "Nos vemos",
+        "output": "Usuario: Nos vemos\nAgerbot: ¡Nos vemos! Recuerda que la constancia y publicar sin miedo es la clave. ¡Éxitos!"
+      },
+      {
+        "prompt": "No sé qué publicar hoy, dame ideas",
+        "output": "Usuario: No sé qué publicar hoy, dame ideas\nAgerbot: ¡Hasta luego! Mucho éxito creando contenido. Si necesitas más ideas o desbloquear otro guion, aquí estaré."
+      },
+      {
+        "prompt": "¿Cómo estructurar un guion de 30 segundos?",
+        "output": "Usuario: ¿Cómo estructurar un guion de 30 segundos?\nAgerbot: Te soy sincero: no tengo capacidad de cálculo matemático en mi conocimiento actual. Mi especialidad es la creatividad, ideas de contenido y ganchos."
+      }
+    ],
+    "strengths": [
+      "Diferencia saludos de despedidas y agradecimientos con precisión.",
+      "Admite honestamente 'no lo sé' ante temas fuera de su dominio.",
+      "Pide contexto de manera adecuada ante palabras sueltas sin sentido.",
+      "Conserva intactas las fórmulas creativas, técnicas anti-bloqueo y la gastronomía peruana.",
+      "Mantiene exactamente el mismo peso compacto de 123 MB y bajo consumo de memoria."
+    ]
+  },
+  "artifacts": {
+    "bestCheckpoint": "checkpoints/creativo-v3/best.pt",
+    "config": "configs/creativo-v3.json",
+    "corpus": "data/processed/creativo_v3.txt",
+    "reservedQuestions": "data/evaluation/creativo_evaluation_v3.txt"
+  }
+}

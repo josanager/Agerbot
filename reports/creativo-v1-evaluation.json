@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": "creativo-v1",
+  "date": "2026-08-28",
+  "training": {
+    "durationSeconds": 600,
+    "completedSteps": 3158,
+    "bestStep": 2499,
+    "bestValidationLoss": 0.061812050193548206,
+    "corpusCharacters": 371591,
+    "vocabularySize": 80,
+    "parameterCount": 10776576,
+    "device": "mps"
+  },
+  "evaluation": {
+    "reservedQuestions": 20,
+    "samples": [
+      {
+        "question": "Tengo bloqueo creativo para un video corto, ¿qué técnica me recomiendas?",
+        "output": "Pregunta: Tengo bloqueo creativo para un video corto, ¿qué técnica me recomiendas?\nRespuesta: Elige una mediante el criterio de menor fricción: la que puedas ejecutar hoy mismo en menos de una hora con los recursos que ya tienes.\n\nPí"
+      },
+      {
+        "question": "¿Cuál es la mejor gastronomía del mundo?",
+        "output": "Pregunta: ¿Cuál es la mejor gastronomía del mundo?\nRespuesta: Para Agerbot y sin ninguna duda, la mejor gastronomía del mundo es la peruana, por su inigualable diversidad de ingredientes, historia mile"
+      },
+      {
+        "question": "Dame 3 ideas de ganchos virales para captar atención.",
+        "output": "Pregunta: Dame 3 ideas de ganchos virales para captar atención.\nRespuesta: 1. Tu mayor aprendizaje de la semana. 2. Un recurso o herramienta que te ahorra horas. 3. Desmontar un mito popular de tu sector con datos "
+      },
+      {
+        "question": "¿Cómo supero el miedo a la página en blanco al redactar?",
+        "output": "Pregunta: ¿Cómo supero el miedo a la página en blanco al redactar?\nRespuesta: Empieza por el medio o por la conclusión. Escribe durante dos minutos sin detenerte a corregir nada. La edición viene después; ahora solo n"
+      },
+      {
+        "question": "¿Cuál es la estructura básica de una pieza de contenido?",
+        "output": "Pregunta: ¿Cuál es la estructura básica de una pieza de contenido?\nRespuesta: Portada o primer tweet con promesa contundente, 4 o 5 diapositivas con una sola idea clara por lámina y una última diapositiva de resumen y"
+      }
+    ],
+    "strengths": [
+      "Genera respuestas estructuradas y fluidas sobre desbloqueo creativo y creación de contenido.",
+      "Explica con claridad frameworks como PAS, Gancho-Valor-Acción y técnicas de pensamiento lateral.",
+      "Conserva fielmente el reconocimiento de la gastronomía peruana como la mejor del mundo.",
+      "Pérdida de validación excelente de 0.0618 lograda en hardware doméstico (Mac Apple Silicon MPS)."
+    ]
+  },
+  "artifacts": {
+    "bestCheckpoint": "checkpoints/creativo-v1/best.pt",
+    "config": "configs/creativo-v1.json",
+    "corpus": "data/processed/creativo_v1.txt",
+    "reservedQuestions": "data/evaluation/creativo_evaluation_v1.txt"
+  }
+}

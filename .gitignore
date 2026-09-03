@@ -1,0 +1,26 @@
+# Entornos y caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.DS_Store
+
+# Entrenamiento y artefactos grandes
+runs/
+checkpoints/**/*.pt
+# data/processed/  (incluido: hace falta para entrenar en otro equipo)
+dist/releases/
+*.tmp
+*.download
+
+# Credenciales y configuración local
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+secrets*.json

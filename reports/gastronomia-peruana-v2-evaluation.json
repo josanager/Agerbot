@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": "gastronomia-peruana-v2",
+  "date": "2026-08-25",
+  "training": {
+    "durationSeconds": 900,
+    "completedSteps": 5948,
+    "bestStep": 4500,
+    "bestValidationLoss": 0.0855,
+    "corpusCharacters": 270366,
+    "vocabularySize": 72,
+    "parameterCount": 10773504,
+    "device": "mps"
+  },
+  "evaluation": {
+    "reservedQuestions": 20,
+    "decoding": {
+      "temperature": 1.0,
+      "topK": 1,
+      "maxNewTokens": 140
+    },
+    "manualAssessment": {
+      "correct": 4,
+      "partiallyCorrect": 3,
+      "incorrect": 13
+    },
+    "strengths": [
+      "Genera español legible y frases completas.",
+      "Responde correctamente algunos conocimientos presentes en el corpus.",
+      "Reconoce su especialidad temática como gastronomía peruana.",
+      "La validación mejoró de 3.5141 a 0.0855."
+    ],
+    "limitations": [
+      "Confunde preguntas parafraseadas que no coinciden con las formulaciones de entrenamiento.",
+      "Selecciona respuestas correctas para otra pregunta del corpus.",
+      "No demuestra todavía comprensión robusta ni recuperación fiable de conocimiento.",
+      "El corpus ampliado contiene variaciones de los mismos 78 pares y no suficiente diversidad semántica."
+    ]
+  },
+  "artifacts": {
+    "bestCheckpoint": "checkpoints/gastronomia-peruana-v2/best.pt",
+    "latestCheckpoint": "checkpoints/gastronomia-peruana-v2/latest.pt",
+    "config": "configs/gastronomia-peruana-v2.json",
+    "corpus": "data/processed/gastronomia_peruana_v2.txt",
+    "reservedQuestions": "data/evaluation/gastronomia_peruana_v1.txt"
+  }
+}
