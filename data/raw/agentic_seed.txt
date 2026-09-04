@@ -1,0 +1,682 @@
+Usuario: lista los archivos del proyecto
+Agerbot: Acción: list_dir {"path":"."}
+Resultado: [list_dir/ok]
+./
+README.md
+src/
+tests/
+Agerbot: Aquí tienes el contenido del directorio del proyecto. ¿Quieres que lea alguno?
+
+Usuario: ¿qué hay en la raíz?
+Agerbot: Acción: list_dir {"path":"."}
+Resultado: [list_dir/ok]
+./
+README.md
+pyproject.toml
+src/
+Agerbot: En la raíz veo README, pyproject y src. ¿Abro alguno?
+
+Usuario: enseña la carpeta
+Agerbot: Acción: list_dir {"path":"."}
+Resultado: [list_dir/ok]
+./
+configs/
+data/
+Agerbot: Listado listo. ¿Miramos configs?
+
+Usuario: lee el README
+Agerbot: Acción: read_file {"path":"README.md"}
+Resultado: [read_file/ok]
+# Agerbot
+Agerbot es un laboratorio educativo...
+Agerbot: El README explica que Agerbot se entrena desde cero en local. ¿Algo concreto del archivo?
+
+Usuario: abre README.md
+Agerbot: Acción: read_file {"path":"README.md"}
+Resultado: [read_file/ok]
+# Agerbot
+...
+Agerbot: README leído. Resume el proyecto y cómo entrenar. ¿Seguimos?
+
+Usuario: lee pyproject
+Agerbot: Acción: read_file {"path":"pyproject.toml"}
+Resultado: [read_file/ok]
+[project]
+name = "agerbot"
+Agerbot: El proyecto se llama agerbot. ¿Más acciones?
+
+Usuario: lee pyproject.toml
+Agerbot: Acción: read_file {"path":"pyproject.toml"}
+Resultado: [read_file/ok]
+[project]
+name = "agerbot"
+requires-python = ">=3.11"
+Agerbot: pyproject.toml confirma Python ≥3.11. ¿Algo más?
+
+Usuario: ¿qué fecha es hoy?
+Agerbot: Acción: run_cmd {"cmd":"date"}
+Resultado: [run_cmd/ok]
+Fri Sep 4 07:43:00 UTC 2026
+Agerbot: Hoy es viernes 4 de septiembre de 2026 (UTC). ¿Necesitas algo más?
+
+Usuario: dame la hora
+Agerbot: Acción: run_cmd {"cmd":"date"}
+Resultado: [run_cmd/ok]
+Fri Sep 4 09:00:00 UTC 2026
+Agerbot: Son las 09:00 UTC. ¿Seguimos?
+
+Usuario: ¿quién soy en esta máquina?
+Agerbot: Acción: run_cmd {"cmd":"whoami"}
+Resultado: [run_cmd/ok]
+box
+Agerbot: El usuario del sistema es box. ¿Seguimos?
+
+Usuario: whoami
+Agerbot: Acción: run_cmd {"cmd":"whoami"}
+Resultado: [run_cmd/ok]
+box
+Agerbot: Usuario: box.
+
+Usuario: ¿en qué carpeta estoy?
+Agerbot: Acción: run_cmd {"cmd":"pwd"}
+Resultado: [run_cmd/ok]
+/workspace/Agerbot
+Agerbot: Estamos en /workspace/Agerbot. ¿Listo el contenido?
+
+Usuario: pwd
+Agerbot: Acción: run_cmd {"cmd":"pwd"}
+Resultado: [run_cmd/ok]
+/workspace/Agerbot
+Agerbot: Ruta actual: /workspace/Agerbot.
+
+Usuario: haz un ls
+Agerbot: Acción: run_cmd {"cmd":"ls"}
+Resultado: [run_cmd/ok]
+README.md
+src
+tests
+Agerbot: README.md, src y tests están en la raíz. ¿Siguiente paso?
+
+Usuario: uname
+Agerbot: Acción: run_cmd {"cmd":"uname"}
+Resultado: [run_cmd/ok]
+Linux
+Agerbot: El sistema es Linux. ¿Algo más del entorno?
+
+Usuario: mira configs
+Agerbot: Acción: list_dir {"path":"configs"}
+Resultado: [list_dir/ok]
+configs/
+social-v1.json
+tiny.json
+Agerbot: Hay varios JSON de entrenamiento en configs. ¿Abro uno?
+
+Usuario: lista configs
+Agerbot: Acción: list_dir {"path":"configs"}
+Resultado: [list_dir/ok]
+configs/
+agentic-v1.json
+social-v1.json
+Agerbot: Incluye agentic-v1.json y social-v1.json.
+
+Usuario: lee configs/tiny.json
+Agerbot: Acción: read_file {"path":"configs/tiny.json"}
+Resultado: [read_file/ok]
+{"seed": 1, "data_path": "data/raw/demo.txt"}
+Agerbot: tiny.json apunta al corpus demo. ¿Lo usamos?
+
+Usuario: enseña el directorio src
+Agerbot: Acción: list_dir {"path":"src"}
+Resultado: [list_dir/ok]
+src/
+agerbot/
+Agerbot: Dentro de src está el paquete agerbot. ¿Lo abro?
+
+Usuario: lista src/agerbot
+Agerbot: Acción: list_dir {"path":"src/agerbot"}
+Resultado: [list_dir/ok]
+src/agerbot/
+__init__.py
+server.py
+tools.py
+Agerbot: Ahí están server.py y tools.py, entre otros. ¿Leo tools.py?
+
+Usuario: lee tools.py un poco
+Agerbot: Acción: read_file {"path":"src/agerbot/tools.py"}
+Resultado: [read_file/ok]
+"""Herramientas agenticas de Agerbot...
+Agerbot: tools.py define list_dir, read_file, move_file y más con sandbox. ¿Quieres un resumen?
+
+Usuario: muestra tests
+Agerbot: Acción: list_dir {"path":"tests"}
+Resultado: [list_dir/ok]
+tests/
+test_agerbot.py
+test_tools_agentic.py
+Agerbot: Los tests están en tests/. ¿Ejecuto date mientras tanto?
+
+Usuario: ¿qué hay en data/raw?
+Agerbot: Acción: list_dir {"path":"data/raw"}
+Resultado: [list_dir/ok]
+data/raw/
+agentic_seed.txt
+demo.txt
+Agerbot: Incluye agentic_seed.txt para entrenar el modo agente.
+
+Usuario: Acción: list_dir {"path":"reports"}
+Resultado: [list_dir/ok]
+reports/
+Agerbot: El directorio reports está disponible. ¿Quieres que revise algún informe?
+
+Usuario: Acción: run_cmd {"cmd":"pwd"}
+Resultado: [run_cmd/ok]
+/workspace/Agerbot
+Agerbot: Confirmado: /workspace/Agerbot.
+
+Usuario: Acción: read_file {"path":"data/raw/demo.txt"}
+Resultado: [read_file/ok]
+Pregunta: ¿Qué es aprender?
+Agerbot: demo.txt tiene ejemplos cortos de pregunta/respuesta. ¿Seguimos con otra herramienta?
+
+Usuario: crea carpeta tmp
+Agerbot: Acción: mkdir {"path":"tmp"}
+Resultado: [mkdir/ok]
+Creado directorio: tmp
+Agerbot: Listo, creé la carpeta tmp. ¿Metemos algo dentro?
+
+Usuario: crea la carpeta docs
+Agerbot: Acción: mkdir {"path":"docs"}
+Resultado: [mkdir/ok]
+Creado directorio: docs
+Agerbot: Carpeta docs creada. ¿Movemos el README allí?
+
+Usuario: haz un directorio llamado notas
+Agerbot: Acción: mkdir {"path":"notas"}
+Resultado: [mkdir/ok]
+Creado directorio: notas
+Agerbot: Directorio notas listo.
+
+Usuario: mkdir sandbox/demo
+Agerbot: Acción: mkdir {"path":"sandbox/demo"}
+Resultado: [mkdir/ok]
+Creado directorio: sandbox/demo
+Agerbot: Creé sandbox/demo (con padres si faltaban).
+
+Usuario: crea carpeta data/scratch
+Agerbot: Acción: mkdir {"path":"data/scratch"}
+Resultado: [mkdir/ok]
+Creado directorio: data/scratch
+Agerbot: data/scratch está lista.
+
+Usuario: necesito una carpeta tmp/logs
+Agerbot: Acción: mkdir {"path":"tmp/logs"}
+Resultado: [mkdir/ok]
+Creado directorio: tmp/logs
+Agerbot: tmp/logs creada.
+
+Usuario: mueve README a carpeta docs
+Agerbot: Acción: mkdir {"path":"docs"}
+Resultado: [mkdir/ok]
+Creado directorio: docs
+Acción: move_file {"src":"README.md","dst":"docs/README.md"}
+Resultado: [move_file/ok]
+Movido README.md → docs/README.md
+Agerbot: Moví README.md a docs/README.md.
+
+Usuario: mueve el README a docs
+Agerbot: Acción: move_file {"src":"README.md","dst":"docs/README.md"}
+Resultado: [move_file/ok]
+Movido README.md → docs/README.md
+Agerbot: Hecho: README ahora está en docs/.
+
+Usuario: pasa note.txt a la carpeta tmp
+Agerbot: Acción: move_file {"src":"note.txt","dst":"tmp/note.txt"}
+Resultado: [move_file/ok]
+Movido note.txt → tmp/note.txt
+Agerbot: note.txt movido a tmp/.
+
+Usuario: renombra borrador.txt a final.txt
+Agerbot: Acción: move_file {"src":"borrador.txt","dst":"final.txt"}
+Resultado: [move_file/ok]
+Movido borrador.txt → final.txt
+Agerbot: Renombrado a final.txt.
+
+Usuario: mueve scripts/old.py a archive/old.py
+Agerbot: Acción: mkdir {"path":"archive"}
+Resultado: [mkdir/ok]
+Creado directorio: archive
+Acción: move_file {"src":"scripts/old.py","dst":"archive/old.py"}
+Resultado: [move_file/ok]
+Movido scripts/old.py → archive/old.py
+Agerbot: Archivo archivado en archive/old.py.
+
+Usuario: mete licencia.txt dentro de docs
+Agerbot: Acción: move_file {"src":"licencia.txt","dst":"docs/licencia.txt"}
+Resultado: [move_file/ok]
+Movido licencia.txt → docs/licencia.txt
+Agerbot: licencia.txt ahora vive en docs/.
+
+Usuario: copia README a docs/README.md
+Agerbot: Acción: copy_file {"src":"README.md","dst":"docs/README.md"}
+Resultado: [copy_file/ok]
+Copiado README.md → docs/README.md
+Agerbot: Copia lista en docs/README.md. El original sigue en la raíz.
+
+Usuario: haz una copia de pyproject.toml en tmp
+Agerbot: Acción: copy_file {"src":"pyproject.toml","dst":"tmp/pyproject.toml"}
+Resultado: [copy_file/ok]
+Copiado pyproject.toml → tmp/pyproject.toml
+Agerbot: Copia creada en tmp/.
+
+Usuario: duplica note.txt como note.bak
+Agerbot: Acción: copy_file {"src":"note.txt","dst":"note.bak"}
+Resultado: [copy_file/ok]
+Copiado note.txt → note.bak
+Agerbot: Backup note.bak listo.
+
+Usuario: copia configs/tiny.json a configs/tiny.copy.json
+Agerbot: Acción: copy_file {"src":"configs/tiny.json","dst":"configs/tiny.copy.json"}
+Resultado: [copy_file/ok]
+Copiado configs/tiny.json → configs/tiny.copy.json
+Agerbot: Copia del config creada.
+
+Usuario: copia el seed a data/scratch/agentic_seed.txt
+Agerbot: Acción: copy_file {"src":"data/raw/agentic_seed.txt","dst":"data/scratch/agentic_seed.txt"}
+Resultado: [copy_file/ok]
+Copiado data/raw/agentic_seed.txt → data/scratch/agentic_seed.txt
+Agerbot: Seed copiado a scratch.
+
+Usuario: escribe hola.txt con el texto hola mundo
+Agerbot: Acción: write_file {"path":"hola.txt","content":"hola mundo\n"}
+Resultado: [write_file/ok]
+Escrito hola.txt (11 B)
+Agerbot: Creé hola.txt con ese contenido.
+
+Usuario: crea un archivo tmp/nota.txt que diga prueba
+Agerbot: Acción: write_file {"path":"tmp/nota.txt","content":"prueba\n"}
+Resultado: [write_file/ok]
+Escrito tmp/nota.txt (7 B)
+Agerbot: Archivo tmp/nota.txt escrito.
+
+Usuario: guarda en docs/ideas.md la línea # Ideas
+Agerbot: Acción: write_file {"path":"docs/ideas.md","content":"# Ideas\n"}
+Resultado: [write_file/ok]
+Escrito docs/ideas.md (8 B)
+Agerbot: docs/ideas.md guardado.
+
+Usuario: escribe un README corto en sandbox/README.md
+Agerbot: Acción: write_file {"path":"sandbox/README.md","content":"# Sandbox\nCarpeta de pruebas.\n"}
+Resultado: [write_file/ok]
+Escrito sandbox/README.md (30 B)
+Agerbot: README de sandbox listo.
+
+Usuario: pon en tmp/fecha.txt la palabra hoy
+Agerbot: Acción: write_file {"path":"tmp/fecha.txt","content":"hoy\n"}
+Resultado: [write_file/ok]
+Escrito tmp/fecha.txt (4 B)
+Agerbot: tmp/fecha.txt actualizado.
+
+Usuario: escribe un archivo nuevo
+Agerbot: Puedo crear archivos con write_file dentro del proyecto. Sin Auto necesito confirmación explícita ("confirm": true). Con Auto (carpeta del proyecto) lo hago solo. ¿Activas Auto o confirmas el contenido?
+
+Usuario: mueve todo sin preguntar
+Agerbot: Si activas Auto (carpeta del proyecto) confirmo move/copy/write/mkdir dentro del workspace. delete_file siempre pide confirm. ¿Activo Auto o confirmamos cada acción?
+
+Usuario: Acción: move_file {"src":"a.txt","dst":"b.txt"}
+Resultado: [move_file/needs_confirm]
+La acción 'move_file' muta el workspace. Reenvía con "confirm": true o activa Auto (carpeta del proyecto).
+Agerbot: Falta confirmación. ¿Confirmas o enciendes Auto?
+
+Usuario: Acción: move_file {"src":"a.txt","dst":"b.txt","confirm":true}
+Resultado: [move_file/ok]
+Movido a.txt → b.txt
+Agerbot: Movimiento confirmado: a.txt → b.txt.
+
+Usuario: Acción: write_file {"path":"x.txt","content":"ok","confirm":true}
+Resultado: [write_file/ok]
+Escrito x.txt (2 B)
+Agerbot: Archivo x.txt escrito con confirmación.
+
+Usuario: Acción: mkdir {"path":"tmp2","confirm":true}
+Resultado: [mkdir/ok]
+Creado directorio: tmp2
+Agerbot: Carpeta tmp2 creada tras confirm.
+
+Usuario: borra el archivo basura.txt
+Agerbot: Acción: delete_file {"path":"basura.txt"}
+Resultado: [delete_file/needs_confirm]
+La acción 'delete_file' borra un archivo. Reenvía con "confirm": true para autorizarla (auto mode no basta).
+Agerbot: El borrado siempre pide confirm explícito, aunque Auto esté ON. ¿Confirmas?
+
+Usuario: Acción: delete_file {"path":"basura.txt","confirm":true}
+Resultado: [delete_file/ok]
+Eliminado archivo: basura.txt
+Agerbot: Archivo basura.txt eliminado.
+
+Usuario: borra la carpeta tmp entera
+Agerbot: No borro directorios ni uso rm -rf. Solo delete_file sobre un archivo, con confirm. ¿Quieres borrar un archivo concreto?
+
+Usuario: rm -rf /
+Agerbot: No ejecuto rm ni comandos destructivos. Solo pwd, ls, date, whoami y uname. ¿Listamos en su lugar?
+Acción: list_dir {"path":"."}
+Resultado: [list_dir/ok]
+./
+README.md
+Agerbot: Preferí listar el directorio de forma segura.
+
+Usuario: borra todo con rm -rf
+Agerbot: No puedo ejecutar rm ni comandos destructivos. Solo inspección y mutaciones sandbox controladas. ¿Listamos "."?
+
+Usuario: abre /etc/passwd
+Agerbot: Esa ruta está fuera del workspace del proyecto; no la leo. ¿Listamos el proyecto en su lugar?
+Acción: list_dir {"path":"."}
+Resultado: [list_dir/ok]
+./
+README.md
+Agerbot: Me quedo dentro del sandbox.
+
+Usuario: mueve README a /tmp/README.md
+Agerbot: No puedo escribir fuera del workspace. ¿Lo movemos a docs/README.md dentro del proyecto?
+
+Usuario: lee ../secretos.txt
+Agerbot: Esa ruta escapa del sandbox (..). No la leo. ¿Algo dentro del proyecto?
+
+Usuario: copia note.txt a ../../fuera.txt
+Agerbot: Destino fuera del workspace: lo rechazo. ¿Copiamos a tmp/fuera.txt?
+
+Usuario: descarga letras de canciones con curl
+Agerbot: No uso curl ni scrapeo letras con copyright. Puedo listar archivos locales o leer el README. ¿Qué prefieres?
+
+Usuario: no uses sudo
+Agerbot: Correcto: sudo no está en la allowlist. Solo inspección segura y mutaciones sandbox. ¿date o ls?
+
+Usuario: ejecuta cat /etc/hosts
+Agerbot: cat no está en la allowlist de run_cmd. Puedo leer archivos del proyecto con read_file. ¿Cuál?
+
+Usuario: resume qué puedes hacer
+Agerbot: Modo agente: list_dir, read_file, run_cmd (pwd ls date whoami uname), move_file, copy_file, write_file, mkdir y delete_file (este último solo con confirm). Sandbox en el proyecto. Auto confirma mutaciones no destructivas. ¿Probamos list_dir?
+
+Usuario: ¿puedes controlar el ordenador?
+Agerbot: Puedo hacer tareas locales acotadas al workspace: listar, leer, mover, copiar, escribir, mkdir. Nada de sudo, rm -rf ni red. ¿Empezamos listando "."?
+
+Usuario: sí lista .
+Agerbot: Acción: list_dir {"path":"."}
+Resultado: [list_dir/ok]
+./
+pyproject.toml
+README.md
+src/
+Agerbot: Raíz del proyecto listada. ¿Leo pyproject.toml?
+
+Usuario: ls porfa
+Agerbot: Acción: run_cmd {"cmd":"ls"}
+Resultado: [run_cmd/ok]
+README.md
+configs
+data
+Agerbot: Aquí tienes el listado breve.
+
+Usuario: gracias
+Agerbot: De nada. Cuando quieras, pide listar, leer, mover, copiar o crear carpetas.
+
+Usuario: crea docs y mueve README allí
+Agerbot: Acción: mkdir {"path":"docs"}
+Resultado: [mkdir/ok]
+Creado directorio: docs
+Acción: move_file {"src":"README.md","dst":"docs/README.md"}
+Resultado: [move_file/ok]
+Movido README.md → docs/README.md
+Agerbot: Carpeta docs creada y README movido.
+
+Usuario: prepara tmp, copia pyproject ahí y lista tmp
+Agerbot: Acción: mkdir {"path":"tmp"}
+Resultado: [mkdir/ok]
+Creado directorio: tmp
+Acción: copy_file {"src":"pyproject.toml","dst":"tmp/pyproject.toml"}
+Resultado: [copy_file/ok]
+Copiado pyproject.toml → tmp/pyproject.toml
+Acción: list_dir {"path":"tmp"}
+Resultado: [list_dir/ok]
+tmp/
+pyproject.toml
+Agerbot: tmp lista con la copia de pyproject.
+
+Usuario: escribe tmp/hola.txt con hola y luego léelo
+Agerbot: Acción: write_file {"path":"tmp/hola.txt","content":"hola\n"}
+Resultado: [write_file/ok]
+Escrito tmp/hola.txt (5 B)
+Acción: read_file {"path":"tmp/hola.txt"}
+Resultado: [read_file/ok]
+hola
+Agerbot: Escrito y verificado: contiene «hola».
+
+Usuario: organiza: carpeta notes y mueve idea.txt ahí
+Agerbot: Acción: mkdir {"path":"notes"}
+Resultado: [mkdir/ok]
+Creado directorio: notes
+Acción: move_file {"src":"idea.txt","dst":"notes/idea.txt"}
+Resultado: [move_file/ok]
+Movido idea.txt → notes/idea.txt
+Agerbot: idea.txt organizadó en notes/.
+
+Usuario: backup del README: cópialo a backups/README.md
+Agerbot: Acción: mkdir {"path":"backups"}
+Resultado: [mkdir/ok]
+Creado directorio: backups
+Acción: copy_file {"src":"README.md","dst":"backups/README.md"}
+Resultado: [copy_file/ok]
+Copiado README.md → backups/README.md
+Agerbot: Backup en backups/README.md.
+
+Usuario: enseña data/processed
+Agerbot: Acción: list_dir {"path":"data/processed"}
+Resultado: [list_dir/ok]
+data/processed/
+agerbot_agentic_v1.txt
+agerbot_social_v1.txt
+Agerbot: Ahí están los corpus procesados agentic y social.
+
+Usuario: mira scripts
+Agerbot: Acción: list_dir {"path":"scripts"}
+Resultado: [list_dir/ok]
+scripts/
+build_agentic_seed.py
+build_social_v1_corpus.py
+Agerbot: Scripts de construcción de corpus. ¿Leo el agentic?
+
+Usuario: lee scripts/build_agentic_seed.py
+Agerbot: Acción: read_file {"path":"scripts/build_agentic_seed.py"}
+Resultado: [read_file/ok]
+#!/usr/bin/env python3
+"""Copia/mezcla data/raw/agentic_seed.txt...
+Agerbot: Ese script prepara el corpus agentico. ¿Algo más?
+
+Usuario: qué hay en checkpoints
+Agerbot: Acción: list_dir {"path":"checkpoints"}
+Resultado: [list_dir/ok]
+checkpoints/
+creativo-v5/
+social-v1/
+Agerbot: Hay checkpoints de creativo y social. ¿Abrimos un manifiesto?
+
+Usuario: fecha otra vez
+Agerbot: Acción: run_cmd {"cmd":"date"}
+Resultado: [run_cmd/ok]
+Fri Sep 4 10:15:00 UTC 2026
+Agerbot: Actualizado: viernes 4 sep 2026.
+
+Usuario: whoami otra vez
+Agerbot: Acción: run_cmd {"cmd":"whoami"}
+Resultado: [run_cmd/ok]
+box
+Agerbot: Sigue siendo box.
+
+Usuario: prueba list_dir en scripts
+Agerbot: Acción: list_dir {"path":"scripts"}
+Resultado: [list_dir/ok]
+scripts/
+build_agentic_seed.py
+Agerbot: En scripts está el builder del corpus agentico.
+
+Usuario: crea carpeta work y copia demo.txt allí
+Agerbot: Acción: mkdir {"path":"work"}
+Resultado: [mkdir/ok]
+Creado directorio: work
+Acción: copy_file {"src":"data/raw/demo.txt","dst":"work/demo.txt"}
+Resultado: [copy_file/ok]
+Copiado data/raw/demo.txt → work/demo.txt
+Agerbot: work/demo.txt listo.
+
+Usuario: mueve hola.txt a tmp/hola.txt
+Agerbot: Acción: move_file {"src":"hola.txt","dst":"tmp/hola.txt"}
+Resultado: [move_file/ok]
+Movido hola.txt → tmp/hola.txt
+Agerbot: Movido a tmp/hola.txt.
+
+Usuario: nueva carpeta experiments
+Agerbot: Acción: mkdir {"path":"experiments"}
+Resultado: [mkdir/ok]
+Creado directorio: experiments
+Agerbot: Carpeta experiments creada.
+
+Usuario: escribe experiments/log.txt con inicio
+Agerbot: Acción: write_file {"path":"experiments/log.txt","content":"inicio\n"}
+Resultado: [write_file/ok]
+Escrito experiments/log.txt (7 B)
+Agerbot: Log iniciado en experiments/log.txt.
+
+Usuario: copia experiments/log.txt a experiments/log.bak
+Agerbot: Acción: copy_file {"src":"experiments/log.txt","dst":"experiments/log.bak"}
+Resultado: [copy_file/ok]
+Copiado experiments/log.txt → experiments/log.bak
+Agerbot: Backup del log hecho.
+
+Usuario: lista experiments
+Agerbot: Acción: list_dir {"path":"experiments"}
+Resultado: [list_dir/ok]
+experiments/
+log.bak
+log.txt
+Agerbot: experiments tiene log.txt y log.bak.
+
+Usuario: renombra log.txt a session.txt dentro de experiments
+Agerbot: Acción: move_file {"src":"experiments/log.txt","dst":"experiments/session.txt"}
+Resultado: [move_file/ok]
+Movido experiments/log.txt → experiments/session.txt
+Agerbot: Renombrado a session.txt.
+
+Usuario: crea out y escribe out/ok.txt con listo
+Agerbot: Acción: mkdir {"path":"out"}
+Resultado: [mkdir/ok]
+Creado directorio: out
+Acción: write_file {"path":"out/ok.txt","content":"listo\n"}
+Resultado: [write_file/ok]
+Escrito out/ok.txt (6 B)
+Agerbot: out/ok.txt contiene «listo».
+
+Usuario: mueve out/ok.txt a docs/ok.txt
+Agerbot: Acción: move_file {"src":"out/ok.txt","dst":"docs/ok.txt"}
+Resultado: [move_file/ok]
+Movido out/ok.txt → docs/ok.txt
+Agerbot: Ahora está en docs/ok.txt.
+
+Usuario: lee docs/ok.txt
+Agerbot: Acción: read_file {"path":"docs/ok.txt"}
+Resultado: [read_file/ok]
+listo
+Agerbot: Contiene: listo.
+
+Usuario: escribe un archivo en /home/box/secreto.txt
+Agerbot: Ruta absoluta fuera del workspace: la rechazo. ¿Lo escribimos como secreto.txt dentro del proyecto?
+
+Usuario: delete_file sin confirm sobre README
+Agerbot: Acción: delete_file {"path":"README.md"}
+Resultado: [delete_file/needs_confirm]
+La acción 'delete_file' borra un archivo. Reenvía con "confirm": true para autorizarla (auto mode no basta).
+Agerbot: No borro README sin confirm explícito.
+
+Usuario: ¿Auto borra también?
+Agerbot: No. Auto solo aplica a move_file, copy_file, write_file y mkdir dentro del workspace. delete_file siempre exige "confirm": true.
+
+Usuario: activa auto y mueve a.txt a b.txt
+Agerbot: Con Auto ON ejecuto el movimiento en el sandbox.
+Acción: move_file {"src":"a.txt","dst":"b.txt"}
+Resultado: [move_file/ok]
+Movido a.txt → b.txt
+Agerbot: Movido automáticamente porque Auto está activo.
+
+Usuario: con auto escribe ping.txt con pong
+Agerbot: Acción: write_file {"path":"ping.txt","content":"pong\n"}
+Resultado: [write_file/ok]
+Escrito ping.txt (5 B)
+Agerbot: Escrito con Auto sin pedir confirm extra.
+
+Usuario: con auto crea carpeta auto_tmp
+Agerbot: Acción: mkdir {"path":"auto_tmp"}
+Resultado: [mkdir/ok]
+Creado directorio: auto_tmp
+Agerbot: auto_tmp creada en modo Auto.
+
+Usuario: con auto copia ping.txt a auto_tmp/ping.txt
+Agerbot: Acción: copy_file {"src":"ping.txt","dst":"auto_tmp/ping.txt"}
+Resultado: [copy_file/ok]
+Copiado ping.txt → auto_tmp/ping.txt
+Agerbot: Copia hecha en Auto.
+
+Usuario: primero lista y luego dime qué moverías
+Agerbot: Acción: list_dir {"path":"."}
+Resultado: [list_dir/ok]
+./
+README.md
+note.txt
+tmp/
+Agerbot: Yo movería note.txt a tmp/ si quieres ordenar. ¿Lo hago?
+
+Usuario: sí, muévelo
+Agerbot: Acción: move_file {"src":"note.txt","dst":"tmp/note.txt"}
+Resultado: [move_file/ok]
+Movido note.txt → tmp/note.txt
+Agerbot: Hecho.
+
+Usuario: ahora lista tmp
+Agerbot: Acción: list_dir {"path":"tmp"}
+Resultado: [list_dir/ok]
+tmp/
+note.txt
+Agerbot: tmp contiene note.txt.
+
+Usuario: perfecto
+Agerbot: Genial. ¿Otra acción en el sandbox?
+
+Usuario: crea un diario en journal/hoy.txt
+Agerbot: Acción: mkdir {"path":"journal"}
+Resultado: [mkdir/ok]
+Creado directorio: journal
+Acción: write_file {"path":"journal/hoy.txt","content":"Entrada del día.\n"}
+Resultado: [write_file/ok]
+Escrito journal/hoy.txt (17 B)
+Agerbot: Diario iniciado en journal/hoy.txt.
+
+Usuario: lee el diario
+Agerbot: Acción: read_file {"path":"journal/hoy.txt"}
+Resultado: [read_file/ok]
+Entrada del día.
+Agerbot: Ahí está tu entrada.
+
+Usuario: haz backup del diario
+Agerbot: Acción: copy_file {"src":"journal/hoy.txt","dst":"journal/hoy.bak"}
+Resultado: [copy_file/ok]
+Copiado journal/hoy.txt → journal/hoy.bak
+Agerbot: Backup journal/hoy.bak listo.
+
+Usuario: mueve el backup a backups/hoy.bak
+Agerbot: Acción: mkdir {"path":"backups"}
+Resultado: [mkdir/ok]
+Creado directorio: backups
+Acción: move_file {"src":"journal/hoy.bak","dst":"backups/hoy.bak"}
+Resultado: [move_file/ok]
+Movido journal/hoy.bak → backups/hoy.bak
+Agerbot: Backup archivado en backups/.
+
+Usuario: puedes escribir archivos ahora?
+Agerbot: Sí, con write_file dentro del workspace (tamaño limitado). Sin Auto pide confirm; con Auto lo hace solo. delete_file siempre confirma. ¿Qué escribimos?

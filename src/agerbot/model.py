@@ -135,6 +135,7 @@ class Agerbot(nn.Module):
         temperature: float = 0.8,
         top_k: int | None = 40,
         should_stop: Callable[[], bool] | None = None,
+        stop_token_ids: set[int] | None = None,
     ) -> torch.Tensor:
         if temperature <= 0:
             raise ValueError("temperature debe ser mayor que cero")
@@ -151,6 +152,8 @@ class Agerbot(nn.Module):
             probabilities = F.softmax(next_logits, dim=-1)
             next_token = torch.multinomial(probabilities, num_samples=1)
             tokens = torch.cat((tokens, next_token), dim=1)
+            if stop_token_ids and int(next_token.item()) in stop_token_ids:
+                break
         return tokens
 
     def parameter_count(self) -> int:
