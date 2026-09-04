@@ -7,7 +7,7 @@ import argparse
 import torch
 
 from .model import Agerbot, ModelConfig
-from .runtime import select_device
+from .runtime import load_checkpoint, select_device
 from .tokenizer import tokenizer_from_dict
 
 # Marcadores de cambio de turno en el formato de diálogo del corpus.
@@ -65,7 +65,7 @@ def generate(
     trim_chat: bool = True,
 ) -> str:
     device = select_device(requested_device)
-    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    checkpoint = load_checkpoint(checkpoint_path, map_location=device, weights_only=False)
     tokenizer = tokenizer_from_dict(checkpoint.get("tokenizer", "byte-v1"))
     model = Agerbot(ModelConfig(**checkpoint["model_config"])).to(device)
     model.load_state_dict(checkpoint["model_state"])

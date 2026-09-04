@@ -1,0 +1,38 @@
+{
+  "seed": 20260904,
+  "data_path": "data/processed/agerbot_learn_v1.txt",
+  "checkpoint_dir": "checkpoints/densify-v1",
+  "device": "cpu",
+  "tokenizer": {
+    "type": "bpe",
+    "version": 1,
+    "path": "data/tokenizers/densify-v1"
+  },
+  "multitarget": {
+    "enabled": true,
+    "max_extra_turns": 4000,
+    "min_variants": 2
+  },
+  "checkpoint_float16": true,
+  "train_fraction": 0.9,
+  "batch_size": 2,
+  "gradient_accumulation_steps": 8,
+  "max_steps": 100000,
+  "max_duration_seconds": 4800,
+  "eval_interval": 100,
+  "eval_batches": 8,
+  "save_interval": 1000,
+  "early_stopping_patience": 25,
+  "learning_rate": 0.00025,
+  "weight_decay": 0.18,
+  "grad_clip": 1.0,
+  "sample_tokens": 160,
+  "model": {
+    "vocab_size": 5421,
+    "context_length": 256,
+    "d_model": 512,
+    "n_heads": 8,
+    "n_layers": 8,
+    "dropout": 0.2
+  }
+}

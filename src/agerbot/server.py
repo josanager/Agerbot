@@ -25,7 +25,7 @@ import torch
 from .data import load_corpus, random_batch, split_corpus
 from .generate import normalize_chat_text, trim_assistant_completion
 from .model import Agerbot, ModelConfig
-from .runtime import save_checkpoint, select_device
+from .runtime import load_checkpoint, save_checkpoint, select_device
 from .tokenizer import tokenizer_from_dict, tokenizer_identifier
 from .tools import (
     AgenticTrace,
@@ -494,7 +494,7 @@ class AgerbotRuntime:
         self.manifest = load_checkpoint_manifest(self.checkpoint_path)
         self.device = select_device(requested_device)
         try:
-            checkpoint = torch.load(
+            checkpoint = load_checkpoint(
                 self.checkpoint_path, map_location=self.device, weights_only=True
             )
             if "tokenizer" not in checkpoint:
@@ -1003,7 +1003,7 @@ class TrainingManager:
             data_file = processed_dir / "agerbot.txt"
 
             base_manifest = load_checkpoint_manifest(base_checkpoint_path)
-            base_checkpoint = torch.load(
+            base_checkpoint = load_checkpoint(
                 base_checkpoint_path, map_location="cpu", weights_only=True
             )
             base_training_name = base_manifest.training_name

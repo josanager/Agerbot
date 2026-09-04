@@ -8,10 +8,10 @@ from pathlib import Path
 
 import torch
 
-from .data import load_corpus, random_batch, split_corpus
+from .data import augment_multitarget_text, load_corpus, random_batch, split_corpus
 from .model import Agerbot, ModelConfig
-from .runtime import load_json, save_checkpoint, seed_everything, select_device
-from .tokenizer import ByteTokenizer, CharTokenizer
+from .runtime import load_checkpoint, load_json, save_checkpoint, seed_everything, select_device
+from .tokenizer import build_tokenizer_from_config
 
 
 @torch.inference_mode()
@@ -44,14 +44,21 @@ def train(config_path: str, resume: str | None = None) -> Path:
     seed_everything(config["seed"])
     device = select_device(config.get("device", "auto"))
     corpus_text = Path(config["data_path"]).read_text(encoding="utf-8")
-    tokenizer_type = config.get("tokenizer", {}).get("type", "byte")
-    if tokenizer_type == "char":
-        tokenizer = CharTokenizer.fit(corpus_text)
-    elif tokenizer_type == "byte":
-        tokenizer = ByteTokenizer()
-    else:
-        raise ValueError(f"Tokenizador no soportado: {tokenizer_type}")
-    all_tokens = load_corpus(config["data_path"], tokenizer)
+    multitarget = config.get("multitarget") or {}
+    if multitarget.get("enabled", False):
+        before = len(corpus_text)
+        corpus_text = augment_multitarget_text(
+            corpus_text,
+            seed=config["seed"],
+            max_extra_turns=int(multitarget.get("max_extra_turns", 4000)),
+            min_variants=int(multitarget.get("min_variants", 2)),
+        )
+        print(
+            f"multitarget=on chars_before={before:,} chars_after={len(corpus_text):,}"
+        )
+
+    tokenizer = build_tokenizer_from_config(config, corpus_text)
+    all_tokens = load_corpus(config["data_path"], tokenizer, text=corpus_text)
     train_tokens, val_tokens = split_corpus(all_tokens, config["train_fraction"])
 
     model_values = {**config["model"], "vocab_size": tokenizer.vocab_size}
@@ -66,9 +73,10 @@ def train(config_path: str, resume: str | None = None) -> Path:
     best_val_loss = float("inf")
     evaluations_without_improvement = 0
     if resume:
-        checkpoint = torch.load(resume, map_location=device, weights_only=False)
+        checkpoint = load_checkpoint(resume, map_location=device, weights_only=False)
         model.load_state_dict(checkpoint["model_state"])
-        optimizer.load_state_dict(checkpoint["optimizer_state"])
+        if "optimizer_state" in checkpoint:
+            optimizer.load_state_dict(checkpoint["optimizer_state"])
         start_step = checkpoint["step"] + 1
         best_val_loss = checkpoint.get("best_val_loss", best_val_loss)
 
@@ -78,9 +86,11 @@ def train(config_path: str, resume: str | None = None) -> Path:
     started = time.perf_counter()
     max_duration = config.get("max_duration_seconds")
     deadline = started + max_duration if max_duration else None
+    store_fp16 = bool(config.get("checkpoint_float16", True))
     print(
         f"device={device} parameters={model.parameter_count():,} "
-        f"tokens={len(all_tokens):,}"
+        f"tokens={len(all_tokens):,} vocab={tokenizer.vocab_size} "
+        f"tokenizer={config.get('tokenizer', {}).get('type', 'byte')}"
     )
 
     for step in range(start_step, config["max_steps"]):
@@ -124,12 +134,17 @@ def train(config_path: str, resume: str | None = None) -> Path:
                     "step": step,
                     "model_config": model_config.to_dict(),
                     "model_state": model.state_dict(),
-                    "optimizer_state": optimizer.state_dict(),
                     "training_config": config,
                     "tokenizer": tokenizer.to_dict(),
                     "best_val_loss": best_val_loss,
                 }
-                save_checkpoint(checkpoint_dir / "best.pt", best_payload)
+                # best.pt sin optimizer: cabe en ~FP16 ≤180MB con ~30M params
+                save_checkpoint(
+                    checkpoint_dir / "best.pt",
+                    best_payload,
+                    store_model_float16=store_fp16,
+                    include_optimizer=False,
+                )
                 print(f"best_checkpoint={checkpoint_dir / 'best.pt'}")
             else:
                 evaluations_without_improvement += 1
@@ -146,8 +161,15 @@ def train(config_path: str, resume: str | None = None) -> Path:
                 "tokenizer": tokenizer.to_dict(),
                 "best_val_loss": best_val_loss,
             }
-            save_checkpoint(latest_path, payload)
-            save_checkpoint(checkpoint_dir / f"step-{step + 1:06d}.pt", payload)
+            save_checkpoint(
+                latest_path, payload, store_model_float16=store_fp16, include_optimizer=True
+            )
+            save_checkpoint(
+                checkpoint_dir / f"step-{step + 1:06d}.pt",
+                payload,
+                store_model_float16=store_fp16,
+                include_optimizer=True,
+            )
             print(f"checkpoint={latest_path}")
 
         patience = config.get("early_stopping_patience")
@@ -169,8 +191,15 @@ def train(config_path: str, resume: str | None = None) -> Path:
                 "tokenizer": tokenizer.to_dict(),
                 "best_val_loss": best_val_loss,
             }
-            save_checkpoint(latest_path, payload)
-            save_checkpoint(checkpoint_dir / f"step-{step + 1:06d}.pt", payload)
+            save_checkpoint(
+                latest_path, payload, store_model_float16=store_fp16, include_optimizer=True
+            )
+            save_checkpoint(
+                checkpoint_dir / f"step-{step + 1:06d}.pt",
+                payload,
+                store_model_float16=store_fp16,
+                include_optimizer=True,
+            )
             print(
                 f"time_limit_reached={max_duration}s step={step + 1} "
                 f"checkpoint={latest_path}"

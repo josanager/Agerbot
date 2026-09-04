@@ -21,7 +21,7 @@ import torch
 
 from agerbot.generate import trim_assistant_completion
 from agerbot.model import Agerbot, ModelConfig
-from agerbot.runtime import select_device
+from agerbot.runtime import load_checkpoint, select_device
 from agerbot.tokenizer import tokenizer_from_dict
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -200,7 +200,7 @@ def evaluate(
     out_path: Path | None,
 ) -> dict:
     device = select_device(device_name)
-    ckpt = torch.load(checkpoint, map_location=device, weights_only=False)
+    ckpt = load_checkpoint(checkpoint, map_location=device, weights_only=False)
     tokenizer = tokenizer_from_dict(ckpt["tokenizer"])
     model = Agerbot(ModelConfig(**ckpt["model_config"])).to(device)
     model.load_state_dict(ckpt["model_state"])
