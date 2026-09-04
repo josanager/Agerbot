@@ -94,7 +94,7 @@ Cuando termine, pregunta en el chat con otras palabras para ver si entendió.
 uv run agerbot-serve --checkpoint checkpoints/agerbot/best.pt
 ```
 
-## Modo agente (v1)
+## Modo agente (v1 / mutaciones sandbox)
 
 Agerbot puede emitir una línea de herramienta y el runtime la ejecuta en un
 sandbox local, inyecta `Resultado:` y deja que el modelo continúe (máx. 3 bucles).
@@ -104,29 +104,46 @@ sandbox local, inyecta `Resultado:` y deja que el modelo continúe (máx. 3 bucl
 - `list_dir` — listar directorios dentro del workspace del proyecto.
 - `read_file` — leer archivos de texto (tamaño acotado).
 - `run_cmd` — solo `pwd`, `ls`, `date`, `whoami`, `uname`.
+- `move_file` / `copy_file` — mover o copiar archivos **dentro** del workspace.
+- `write_file` — escribir texto (tamaño acotado) dentro del workspace.
+- `mkdir` — crear carpetas (con padres) dentro del workspace.
+- `delete_file` — borrar **solo archivos** (nunca directorios); siempre exige
+  `"confirm": true` (Auto no basta).
 - Protocolo: `Acción: list_dir {"path":"."}` → `Resultado: ...` → respuesta humana.
 
 **Qué no puede hacer**
 
-- Borrar, escribir, `sudo`, `curl`, pipes o scrapeo (p. ej. letras con copyright).
+- `rm -rf`, wipe de home, `sudo`, `curl`, pipes o scrapeo (p. ej. letras con copyright).
 - Salir del workspace configurado (`--workspace` / `AGERBOT_WORKSPACE`).
-- Mutar la máquina sin confirmación explícita (`"confirm": true` en la Acción).
+- Borrar directorios o mutar fuera del sandbox.
+
+**Confirmación y Auto**
+
+- Sin Auto: `move_file` / `copy_file` / `write_file` / `mkdir` piden
+  `"confirm": true` en la Acción.
+- Con Auto: esas cuatro se ejecutan solas **solo dentro** del workspace.
+- `delete_file` **siempre** pide confirm explícito.
+- Studio: toggle «Auto (carpeta del proyecto)» junto a «Modo agente».
+- Servidor: `--agentic-auto` / env `AGERBOT_AGENTIC_AUTO=1`, o JSON
+  `"agenticAuto": true` en `/v1/chat`.
 
 **Cómo activarlo**
 
-- Por defecto **activado** en Studio (`agentic: true`).
-- Toggle «Modo agente» en la cabecera del Studio, o en el JSON de `/v1/chat`:
-  `"agentic": true`.
-- CLI: `uv run agerbot-serve --agentic` / `--no-agentic`.
-- Corpus seed (sin entrenar aún): `data/raw/agentic_seed.txt` →
-  `uv run python scripts/build_agentic_seed.py`.
+- Por defecto **activado** en Studio (`agentic: true`); Auto por defecto **off**.
+- Toggle «Modo agente» / «Auto (carpeta del proyecto)» en la cabecera del Studio.
+- CLI: `uv run agerbot-serve --agentic` / `--no-agentic` y
+  `--agentic-auto` / `--no-agentic-auto`.
+- Corpus: `data/raw/agentic_seed.txt` →
+  `uv run python scripts/build_agentic_seed.py` →
+  `data/processed/agerbot_agentic_v1.txt` (mezcla con slice social).
+- Train CPU (~45–60 min): `configs/agentic-v1.json` (arch 384/6/6/256).
 
 Ejemplo (fuerza la herramienta desde el mensaje de usuario):
 
 ```bash
 curl -s http://127.0.0.1:4318/v1/chat \
   -H 'Content-Type: application/json' \
-  -d '{"conversationId":"demo","message":"Acción: list_dir {\"path\":\".\"}","agentic":true,"history":[],"generation":{"maxNewTokens":64,"temperature":0.2,"topK":10}}'
+  -d '{"conversationId":"demo","message":"Acción: list_dir {\"path\":\".\"}","agentic":true,"agenticAuto":false,"history":[],"generation":{"maxNewTokens":64,"temperature":0.2,"topK":10}}'
 ```
 
 ## Usar tus propios datos

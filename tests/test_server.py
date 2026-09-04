@@ -290,6 +290,7 @@ class RuntimeFailureTests(unittest.TestCase):
         runtime.tokenizer = __import__("agerbot").ByteTokenizer()
         runtime.device = torch.device("cpu")
         runtime.agentic_default = False
+        runtime.agentic_auto_default = False
         runtime.tool_runtime = None
         runtime.manifest = type("M", (), {"model_name": "Agerbot", "model_version": "test"})()
         runtime._active = {}

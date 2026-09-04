@@ -1,4 +1,4 @@
-"""Herramientas agenticas de Agerbot: lectura segura + comandos en allowlist."""
+"""Herramientas agenticas de Agerbot: lectura segura + mutaciones sandbox + allowlist."""
 
 from __future__ import annotations
 
@@ -6,12 +6,14 @@ import json
 import os
 import re
 import shlex
+import shutil
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
 
 DEFAULT_MAX_FILE_BYTES = 32 * 1024
+DEFAULT_MAX_WRITE_BYTES = 32 * 1024
 DEFAULT_MAX_LIST_ENTRIES = 200
 DEFAULT_MAX_RESULT_CHARS = 4_000
 DEFAULT_CMD_TIMEOUT_SECONDS = 5
@@ -19,11 +21,17 @@ DEFAULT_CMD_TIMEOUT_SECONDS = 5
 # Lecturas / inspección segura: se ejecutan sin confirmación.
 SAFE_TOOLS = frozenset({"list_dir", "read_file", "run_cmd"})
 
+# Mutaciones dentro del workspace: requieren confirm salvo auto mode.
+AUTO_MUTATING_TOOLS = frozenset({"move_file", "copy_file", "write_file", "mkdir"})
+
+# Borrado: solo archivos, siempre con confirm explícito (nunca auto).
+DELETE_TOOLS = frozenset({"delete_file"})
+
+# Compat: conjunto amplio de mutaciones (tests / documentación).
+MUTATING_TOOLS = AUTO_MUTATING_TOOLS | DELETE_TOOLS | frozenset({"run_shell", "delete_path"})
+
 # Comandos permitidos en run_cmd (solo el binario base; sin pipes/redir).
 ALLOWED_COMMANDS = frozenset({"pwd", "ls", "date", "whoami", "uname"})
-
-# Herramientas que mutan el sistema (v1: ninguna expuesta; ruta de confirm lista).
-MUTATING_TOOLS = frozenset({"write_file", "run_shell", "delete_path"})
 
 ACCION_RE = re.compile(
     r"(?m)^\s*Acci[oó]n:\s*([A-Za-z_][A-Za-z0-9_]*)\s*(\{.*\})?\s*$"
@@ -61,10 +69,12 @@ class ToolRuntime:
 
     workspace: Path
     max_file_bytes: int = DEFAULT_MAX_FILE_BYTES
+    max_write_bytes: int = DEFAULT_MAX_WRITE_BYTES
     max_list_entries: int = DEFAULT_MAX_LIST_ENTRIES
     max_result_chars: int = DEFAULT_MAX_RESULT_CHARS
     cmd_timeout_seconds: int = DEFAULT_CMD_TIMEOUT_SECONDS
     allow_mutating: bool = False
+    auto: bool = False
 
     def __post_init__(self) -> None:
         self.workspace = Path(self.workspace).expanduser().resolve()
@@ -88,6 +98,10 @@ class ToolRuntime:
                 f"Ruta fuera del workspace: {raw}",
             ) from error
         return target
+
+    def _rel(self, path: Path) -> str:
+        rel = path.relative_to(self.workspace)
+        return "." if str(rel) == "." else str(rel)
 
     def list_dir(self, path: str = ".", **_: Any) -> str:
         target = self.resolve_path(path)
@@ -124,6 +138,87 @@ class ToolRuntime:
         except UnicodeDecodeError as error:
             raise ToolError("not_text", f"No es texto UTF-8: {path}") from error
         return text
+
+    def move_file(self, src: str, dst: str, **_: Any) -> str:
+        source = self.resolve_path(src)
+        dest = self.resolve_path(dst)
+        if not source.exists():
+            raise ToolError("not_found", f"No existe origen: {src}")
+        if not source.is_file():
+            raise ToolError("not_a_file", f"move_file solo mueve archivos: {src}")
+        if dest.exists() and dest.is_dir():
+            dest = dest / source.name
+            try:
+                dest.relative_to(self.workspace)
+            except ValueError as error:
+                raise ToolError(
+                    "path_outside_workspace",
+                    f"Destino fuera del workspace: {dst}",
+                ) from error
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if dest.exists():
+            raise ToolError("already_exists", f"Ya existe destino: {self._rel(dest)}")
+        shutil.move(str(source), str(dest))
+        return f"Movido {self._rel(source)} → {self._rel(dest)}"
+
+    def copy_file(self, src: str, dst: str, **_: Any) -> str:
+        source = self.resolve_path(src)
+        dest = self.resolve_path(dst)
+        if not source.exists():
+            raise ToolError("not_found", f"No existe origen: {src}")
+        if not source.is_file():
+            raise ToolError("not_a_file", f"copy_file solo copia archivos: {src}")
+        if dest.exists() and dest.is_dir():
+            dest = dest / source.name
+            try:
+                dest.relative_to(self.workspace)
+            except ValueError as error:
+                raise ToolError(
+                    "path_outside_workspace",
+                    f"Destino fuera del workspace: {dst}",
+                ) from error
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if dest.exists():
+            raise ToolError("already_exists", f"Ya existe destino: {self._rel(dest)}")
+        shutil.copy2(str(source), str(dest))
+        return f"Copiado {self._rel(source)} → {self._rel(dest)}"
+
+    def write_file(self, path: str, content: str = "", **_: Any) -> str:
+        if not isinstance(content, str):
+            raise ToolError("bad_args", "write_file requiere content como texto.")
+        encoded = content.encode("utf-8")
+        if len(encoded) > self.max_write_bytes:
+            raise ToolError(
+                "file_too_large",
+                f"Contenido demasiado grande ({len(encoded)} B > {self.max_write_bytes} B).",
+            )
+        target = self.resolve_path(path)
+        if target.exists() and target.is_dir():
+            raise ToolError("not_a_file", f"La ruta es un directorio: {path}")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
+        return f"Escrito {self._rel(target)} ({len(encoded)} B)"
+
+    def mkdir(self, path: str, **_: Any) -> str:
+        target = self.resolve_path(path)
+        if target.exists():
+            if target.is_dir():
+                return f"Ya existe directorio: {self._rel(target)}"
+            raise ToolError("already_exists", f"Ya existe un archivo en: {path}")
+        target.mkdir(parents=True, exist_ok=False)
+        return f"Creado directorio: {self._rel(target)}"
+
+    def delete_file(self, path: str, **_: Any) -> str:
+        target = self.resolve_path(path)
+        if not target.exists():
+            raise ToolError("not_found", f"No existe: {path}")
+        if not target.is_file():
+            raise ToolError(
+                "not_a_file",
+                f"delete_file solo borra archivos, no directorios: {path}",
+            )
+        target.unlink()
+        return f"Eliminado archivo: {self._rel(target)}"
 
     def run_cmd(self, cmd: str, confirm: bool = False, **_: Any) -> str:
         if not isinstance(cmd, str) or not cmd.strip():
@@ -172,27 +267,31 @@ class ToolRuntime:
             pieces.append(f"[exit {completed.returncode}]")
         return "\n".join(pieces) if pieces else "(sin salida)"
 
+    def _authorized(self, name: str, confirm: bool) -> bool:
+        if name in SAFE_TOOLS:
+            return True
+        if name in DELETE_TOOLS:
+            return bool(confirm)
+        if name in AUTO_MUTATING_TOOLS:
+            return bool(confirm or self.auto or self.allow_mutating)
+        if name in MUTATING_TOOLS:
+            return bool(confirm or self.allow_mutating)
+        return bool(confirm)
+
     def execute(self, call: ToolCall) -> ToolResult:
         name = call.name
         args = dict(call.args)
         confirm = bool(args.pop("confirm", False))
 
-        if name in MUTATING_TOOLS and not (confirm or self.allow_mutating):
-            return ToolResult(
-                name=name,
-                ok=False,
-                output=(
-                    f"La acción '{name}' muta el sistema. "
-                    "Reenvía con \"confirm\": true para autorizarla."
-                ),
-                needs_confirm=True,
-                code="needs_confirm",
-            )
-
         handlers: dict[str, Callable[..., str]] = {
             "list_dir": self.list_dir,
             "read_file": self.read_file,
             "run_cmd": self.run_cmd,
+            "move_file": self.move_file,
+            "copy_file": self.copy_file,
+            "write_file": self.write_file,
+            "mkdir": self.mkdir,
+            "delete_file": self.delete_file,
         }
         handler = handlers.get(name)
         if handler is None:
@@ -203,11 +302,21 @@ class ToolRuntime:
                 code="unknown_tool",
             )
 
-        if name not in SAFE_TOOLS and not confirm:
+        if not self._authorized(name, confirm):
+            if name in DELETE_TOOLS:
+                hint = (
+                    f"La acción '{name}' borra un archivo. "
+                    'Reenvía con "confirm": true para autorizarla (auto mode no basta).'
+                )
+            else:
+                hint = (
+                    f"La acción '{name}' muta el workspace. "
+                    'Reenvía con "confirm": true o activa Auto (carpeta del proyecto).'
+                )
             return ToolResult(
                 name=name,
                 ok=False,
-                output=f"'{name}' requiere confirmación explícita.",
+                output=hint,
                 needs_confirm=True,
                 code="needs_confirm",
             )

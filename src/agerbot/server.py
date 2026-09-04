@@ -14,7 +14,7 @@ import signal
 import sys
 import threading
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -483,11 +483,13 @@ class AgerbotRuntime:
         requested_device: str = "auto",
         *,
         agentic: bool = DEFAULT_AGENTIC,
+        agentic_auto: bool = False,
         workspace: str | Path | None = None,
     ) -> None:
         self.agentic_default = bool(agentic)
+        self.agentic_auto_default = bool(agentic_auto)
         root = Path(workspace).expanduser().resolve() if workspace else Path.cwd().resolve()
-        self.tool_runtime = ToolRuntime(workspace=root)
+        self.tool_runtime = ToolRuntime(workspace=root, auto=self.agentic_auto_default)
         self.checkpoint_path = Path(checkpoint_path).expanduser().resolve()
         self.manifest = load_checkpoint_manifest(self.checkpoint_path)
         self.device = select_device(requested_device)
@@ -566,6 +568,7 @@ class AgerbotRuntime:
                 "contextLength": self.model.config.context_length,
             },
             "agentic": self.agentic_default,
+            "agenticAuto": self.agentic_auto_default,
         }
 
     def capabilities(self) -> dict[str, Any]:
@@ -595,8 +598,20 @@ class AgerbotRuntime:
             "agentic": {
                 "supported": True,
                 "enabledByDefault": self.agentic_default,
+                "autoByDefault": self.agentic_auto_default,
                 "maxLoops": MAX_AGENTIC_LOOPS,
-                "tools": ["list_dir", "read_file", "run_cmd"],
+                "tools": [
+                    "list_dir",
+                    "read_file",
+                    "run_cmd",
+                    "move_file",
+                    "copy_file",
+                    "write_file",
+                    "mkdir",
+                    "delete_file",
+                ],
+                "autoTools": ["move_file", "copy_file", "write_file", "mkdir"],
+                "confirmAlways": ["delete_file"],
                 "workspace": str(self.tool_runtime.workspace),
             },
         }
@@ -610,7 +625,12 @@ class AgerbotRuntime:
             return True
 
     def chat(self, payload: dict[str, Any]) -> dict[str, Any]:
-        conversation_id, message, history, generation, agentic = self._validate_chat(payload)
+        conversation_id, message, history, generation, agentic, agentic_auto = self._validate_chat(payload)
+        tool_runtime = (
+            replace(self.tool_runtime, auto=bool(agentic_auto))
+            if self.tool_runtime is not None
+            else None
+        )
         cancel_event = threading.Event()
         with self._active_lock:
             if conversation_id in self._active:
@@ -628,11 +648,11 @@ class AgerbotRuntime:
         trace = AgenticTrace()
         try:
             continuation = ""
-            if agentic:
+            if agentic and tool_runtime is not None:
                 user_calls = extract_acciones(message)
                 if user_calls:
                     results, block = run_acciones(
-                        message, self.tool_runtime, max_calls=MAX_AGENTIC_LOOPS
+                        message, tool_runtime, max_calls=MAX_AGENTIC_LOOPS
                     )
                     trace.add("user", user_calls[:MAX_AGENTIC_LOOPS], results)
                     continuation = block
@@ -643,12 +663,12 @@ class AgerbotRuntime:
             total_generated += gen_count
 
             loops = 0
-            while agentic and loops < MAX_AGENTIC_LOOPS:
+            while agentic and tool_runtime is not None and loops < MAX_AGENTIC_LOOPS:
                 calls = extract_acciones(content)
                 if not calls:
                     break
                 results, block = run_acciones(
-                    content, self.tool_runtime, max_calls=MAX_AGENTIC_LOOPS - loops
+                    content, tool_runtime, max_calls=MAX_AGENTIC_LOOPS - loops
                 )
                 used = extract_acciones(content)[: MAX_AGENTIC_LOOPS - loops]
                 trace.add("model", used, results)
@@ -691,6 +711,7 @@ class AgerbotRuntime:
                     "device": self.device.type,
                 },
                 "agentic": agentic,
+                "agenticAuto": agentic_auto,
             }
             if trace.loops:
                 payload_out["toolResults"] = trace.loops
@@ -749,7 +770,7 @@ class AgerbotRuntime:
 
     def _validate_chat(
         self, payload: dict[str, Any]
-    ) -> tuple[str, str, list[dict[str, str]], dict[str, Any], bool]:
+    ) -> tuple[str, str, list[dict[str, str]], dict[str, Any], bool, bool]:
         if not isinstance(payload, dict):
             raise RuntimeAPIError("bad_request", "La petición debe ser un objeto JSON.")
         conversation_id = payload.get("conversationId")
@@ -759,6 +780,9 @@ class AgerbotRuntime:
         raw_agentic = payload.get("agentic", self.agentic_default)
         if not isinstance(raw_agentic, bool):
             raise RuntimeAPIError("bad_request", "agentic debe ser booleano.")
+        raw_agentic_auto = payload.get("agenticAuto", self.agentic_auto_default)
+        if not isinstance(raw_agentic_auto, bool):
+            raise RuntimeAPIError("bad_request", "agenticAuto debe ser booleano.")
         if not isinstance(conversation_id, str) or not conversation_id.strip():
             raise RuntimeAPIError("bad_request", "conversationId es obligatorio.")
         if len(conversation_id) > 128:
@@ -803,6 +827,7 @@ class AgerbotRuntime:
                 "topK": top_k,
             },
             raw_agentic,
+            raw_agentic_auto,
         )
 
     @staticmethod
@@ -1215,6 +1240,7 @@ class AgerbotHTTPServer(ThreadingHTTPServer):
             checkpoint_path,
             self.requested_device,
             agentic=self.runtime.agentic_default,
+            agentic_auto=self.runtime.agentic_auto_default,
             workspace=self.runtime.tool_runtime.workspace,
         )
         self.runtime = new_runtime
@@ -1262,14 +1288,16 @@ class AgerbotRequestHandler(BaseHTTPRequestHandler):
             if "?" in self.path:
                 query = self.path.split("?", 1)[1]
             if path_only == "/v1/chat":
-                if "agentic" not in payload:
+                if "agentic" not in payload or "agenticAuto" not in payload:
                     q = {
                         part.split("=", 1)[0]: part.split("=", 1)[1]
                         for part in query.split("&")
                         if part and "=" in part
                     }
-                    if "agentic" in q:
+                    if "agentic" not in payload and "agentic" in q:
                         payload["agentic"] = q["agentic"].lower() in {"1", "true", "yes", "on"}
+                    if "agenticAuto" not in payload and "agenticAuto" in q:
+                        payload["agenticAuto"] = q["agenticAuto"].lower() in {"1", "true", "yes", "on"}
                 self._write_json(HTTPStatus.OK, self.server.runtime.chat(payload))
             elif self.path == "/v1/train/start":
                 text = payload.get("data", "")
@@ -1392,6 +1420,20 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_false",
         help="Desactiva modo agente por defecto.",
     )
+    auto_group = parser.add_mutually_exclusive_group()
+    auto_group.add_argument(
+        "--agentic-auto",
+        dest="agentic_auto",
+        action="store_true",
+        default=None,
+        help="Auto-confirma move/copy/write/mkdir dentro del workspace.",
+    )
+    auto_group.add_argument(
+        "--no-agentic-auto",
+        dest="agentic_auto",
+        action="store_false",
+        help="Exige confirm explícito para mutaciones (por defecto).",
+    )
     return parser
 
 
@@ -1408,11 +1450,20 @@ def main() -> None:
             agentic = env_agentic.strip().lower() in {"1", "true", "yes", "on"}
     else:
         agentic = bool(args.agentic)
+    env_auto = os.environ.get("AGERBOT_AGENTIC_AUTO")
+    if args.agentic_auto is None:
+        if env_auto is None:
+            agentic_auto = False
+        else:
+            agentic_auto = env_auto.strip().lower() in {"1", "true", "yes", "on"}
+    else:
+        agentic_auto = bool(args.agentic_auto)
     try:
         runtime = AgerbotRuntime(
             args.checkpoint,
             args.device,
             agentic=agentic,
+            agentic_auto=agentic_auto,
             workspace=args.workspace,
         )
         server = AgerbotHTTPServer((args.host, args.port), runtime)

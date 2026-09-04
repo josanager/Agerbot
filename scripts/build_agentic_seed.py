@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Copia/mezcla data/raw/agentic_seed.txt → data/processed/agerbot_agentic_v1.txt.
+"""Construye data/processed/agerbot_agentic_v1.txt mezclando agentic_seed + slice social.
 
 No lanza entrenamiento: solo prepara corpus para un train futuro.
 """
@@ -7,10 +7,12 @@ No lanza entrenamiento: solo prepara corpus para un train futuro.
 from __future__ import annotations
 
 import argparse
+import random
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SRC = ROOT / "data" / "raw" / "agentic_seed.txt"
+DEFAULT_SOCIAL = ROOT / "data" / "processed" / "agerbot_social_v1.txt"
 DEFAULT_DST = ROOT / "data" / "processed" / "agerbot_agentic_v1.txt"
 
 
@@ -21,39 +23,47 @@ def blocks_of(text: str) -> list[str]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--src", type=Path, default=DEFAULT_SRC)
+    parser.add_argument("--social", type=Path, default=DEFAULT_SOCIAL)
     parser.add_argument("--dst", type=Path, default=DEFAULT_DST)
     parser.add_argument(
-        "--append-to",
-        type=Path,
-        default=None,
-        help="Si se indica, añade los bloques al final de este processed existente.",
+        "--social-slice",
+        type=int,
+        default=120,
+        help="Cuántos bloques sociales mezclar (para seguir conversacional).",
     )
+    parser.add_argument("--seed", type=int, default=20260904)
     args = parser.parse_args()
 
     src_text = args.src.read_text(encoding="utf-8")
-    blocks = blocks_of(src_text)
-    if not blocks:
+    agentic_blocks = blocks_of(src_text)
+    if not agentic_blocks:
         raise SystemExit(f"Sin bloques en {args.src}")
 
-    args.dst.parent.mkdir(parents=True, exist_ok=True)
-    body = "\n\n".join(blocks) + "\n"
-    args.dst.write_text(body, encoding="utf-8")
-    print(f"Wrote {len(blocks)} blocks → {args.dst.relative_to(ROOT)}")
+    social_blocks: list[str] = []
+    if args.social.is_file() and args.social_slice > 0:
+        rng = random.Random(args.seed)
+        all_social = blocks_of(args.social.read_text(encoding="utf-8"))
+        # Preferir turnos cortos conversacionales (sin Acción) para no diluir el agentic.
+        conversational = [
+            b
+            for b in all_social
+            if "Acción:" not in b and b.count("Usuario:") <= 3 and len(b) < 600
+        ]
+        pool = conversational or all_social
+        k = min(args.social_slice, len(pool))
+        social_blocks = rng.sample(pool, k=k)
 
-    if args.append_to is not None:
-        target = args.append_to
-        existing = target.read_text(encoding="utf-8") if target.is_file() else ""
-        merged_blocks = blocks_of(existing)
-        seen = set(merged_blocks)
-        added = 0
-        for block in blocks:
-            if block not in seen:
-                merged_blocks.append(block)
-                seen.add(block)
-                added += 1
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text("\n\n".join(merged_blocks) + "\n", encoding="utf-8")
-        print(f"Appended {added} new blocks → {target}")
+    merged = agentic_blocks + social_blocks
+    rng = random.Random(args.seed + 1)
+    rng.shuffle(merged)
+
+    args.dst.parent.mkdir(parents=True, exist_ok=True)
+    args.dst.write_text("\n\n".join(merged) + "\n", encoding="utf-8")
+    print(
+        f"Wrote {len(merged)} blocks "
+        f"({len(agentic_blocks)} agentic + {len(social_blocks)} social) "
+        f"→ {args.dst.relative_to(ROOT)}"
+    )
 
 
 if __name__ == "__main__":

@@ -37,10 +37,15 @@ WEB_UI_HTML = """<!DOCTYPE html>
 
     <!-- Status & Reset -->
     <div class="flex items-center space-x-3">
-      <button id="agenticToggle" type="button" onclick="toggleAgentic()" title="Activa herramientas locales (list_dir, read_file, run_cmd)" class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-xs font-medium hover:bg-violet-500/25 transition">
+      <button id="agenticToggle" type="button" onclick="toggleAgentic()" title="Activa herramientas locales (list_dir, read_file, run_cmd, move/copy/write/mkdir)" class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-xs font-medium hover:bg-violet-500/25 transition">
         <span>🛠️</span>
         <span id="agenticLabel">Modo agente</span>
         <span id="agenticState" class="opacity-80">ON</span>
+      </button>
+      <button id="agenticAutoToggle" type="button" onclick="toggleAgenticAuto()" title="Auto-confirma move/copy/write/mkdir solo dentro de la carpeta del proyecto. delete_file sigue pidiendo confirm." class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-xs font-medium hover:bg-slate-700 transition">
+        <span>⚡</span>
+        <span id="agenticAutoLabel">Auto (carpeta del proyecto)</span>
+        <span id="agenticAutoState" class="opacity-80">OFF</span>
       </button>
       <div id="statusBadge" class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -59,7 +64,7 @@ WEB_UI_HTML = """<!DOCTYPE html>
         </div>
         <div class="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-sm p-4 text-sm text-slate-200 max-w-[85%] shadow-sm leading-relaxed">
           <p class="font-medium text-indigo-400 mb-1">Agerbot Creativo listo</p>
-          <p>Habla aquí con Agerbot. <b>Modo agente</b> permite acciones locales seguras (listar, leer, pwd/ls/date). En <b>«Entrenar Modelo»</b> pegas diálogos y se entrena este mismo modelo.</p>
+          <p>Habla aquí con Agerbot. <b>Modo agente</b> permite acciones locales (listar, leer, mover, copiar, escribir, mkdir). Activa <b>Auto (carpeta del proyecto)</b> para confirmar mutaciones dentro del sandbox sin preguntar; borrar archivo sigue pidiendo confirm. En <b>«Entrenar Modelo»</b> pegas diálogos y se entrena este mismo modelo.</p>
         </div>
       </div>
     </main>
@@ -231,6 +236,7 @@ WEB_UI_HTML = """<!DOCTYPE html>
       
     let conversationHistory = [];
     let agenticEnabled = true;
+    let agenticAutoEnabled = false;
     const conversationId = 'conv_' + Math.random().toString(36).substring(2, 10);
     const chatContainer = document.getElementById('chatContainer');
     const messageInput = document.getElementById('messageInput');
@@ -267,6 +273,18 @@ WEB_UI_HTML = """<!DOCTYPE html>
           document.getElementById('statusBadge').className = 'flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium';
           document.getElementById('headerVersion').innerText = `v${data.model.version || '0.3.0'}`;
           document.getElementById('headerSubtext').innerText = `${(data.model.parameters / 1000000).toFixed(1)}M Params • contexto ${data.model.contextLength} • ${data.model.trainingName || 'Activo'}`;
+          if (typeof data.agentic === 'boolean' && data.agentic !== agenticEnabled) {
+            agenticEnabled = data.agentic;
+            document.getElementById('agenticState').innerText = agenticEnabled ? 'ON' : 'OFF';
+          }
+          if (typeof data.agenticAuto === 'boolean' && data.agenticAuto !== agenticAutoEnabled) {
+            agenticAutoEnabled = data.agenticAuto;
+            document.getElementById('agenticAutoState').innerText = agenticAutoEnabled ? 'ON' : 'OFF';
+            const autoBtn = document.getElementById('agenticAutoToggle');
+            autoBtn.className = agenticAutoEnabled
+              ? 'flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-medium hover:bg-amber-500/25 transition'
+              : 'flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-xs font-medium hover:bg-slate-700 transition';
+          }
         }
       } catch (err) {
         document.getElementById('statusText').innerText = 'Servidor no detectado';
@@ -283,6 +301,16 @@ WEB_UI_HTML = """<!DOCTYPE html>
       state.innerText = agenticEnabled ? 'ON' : 'OFF';
       btn.className = agenticEnabled
         ? 'flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-xs font-medium hover:bg-violet-500/25 transition'
+        : 'flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-xs font-medium hover:bg-slate-700 transition';
+    }
+
+    function toggleAgenticAuto() {
+      agenticAutoEnabled = !agenticAutoEnabled;
+      const state = document.getElementById('agenticAutoState');
+      const btn = document.getElementById('agenticAutoToggle');
+      state.innerText = agenticAutoEnabled ? 'ON' : 'OFF';
+      btn.className = agenticAutoEnabled
+        ? 'flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-medium hover:bg-amber-500/25 transition'
         : 'flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-xs font-medium hover:bg-slate-700 transition';
     }
 
@@ -377,6 +405,7 @@ WEB_UI_HTML = """<!DOCTYPE html>
             message: text,
             history: conversationHistory,
             agentic: agenticEnabled,
+            agenticAuto: agenticAutoEnabled,
             generation: {
               temperature: 0.55,
               maxNewTokens: 256,
