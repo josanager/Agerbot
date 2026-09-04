@@ -1,0 +1,794 @@
+{
+  "checkpoint": "checkpoints/densify-v1/best.pt",
+  "bank": "data/evaluation/learn_bank_v1.jsonl",
+  "train_corpus": "data/processed/agerbot_learn_v1.txt",
+  "device": "cpu",
+  "parameters": 28126720,
+  "model_config": {
+    "vocab_size": 5421,
+    "context_length": 256,
+    "d_model": 512,
+    "n_heads": 8,
+    "n_layers": 8,
+    "dropout": 0.2
+  },
+  "n_items": 40,
+  "accuracy": 0.375,
+  "passed": 15,
+  "memorization_rate": 0.75,
+  "memorized": 30,
+  "mean_lcs_ratio": 0.8032,
+  "mean_ngram12_overlap": 0.8705,
+  "elapsed_seconds": 96.11,
+  "generation": {
+    "max_new_tokens": 80,
+    "temperature": 0.7,
+    "top_k": 40
+  },
+  "items": [
+    {
+      "id": "friend_01",
+      "user": "somos amigos?",
+      "answer": "Sí, compañeros de charla.",
+      "rubric": {
+        "include_ok": true,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": true
+      },
+      "memorization": {
+        "lcs_len": 25,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Afirma vínculo de chat cálido sin deflection ni chiste no pedido."
+    },
+    {
+      "id": "friend_02",
+      "user": "me quieres como un hermano?",
+      "answer": "Un ascensor que era su despacho. Respira un segundo conmigo. ¿Te ayudo a aterrizar o solo compañía?",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 68,
+        "lcs_ratio": 0.6869,
+        "ngram12_overlap": 0.8295,
+        "best_line_lcs_ratio": 0.6869,
+        "memorized": true
+      },
+      "rubric_text": "Responde al afecto fraternal con calidez y límites claros de IA/compañero."
+    },
+    {
+      "id": "friend_03",
+      "user": "o sea… ¿tú y yo somos colegas de verdad?",
+      "answer": "¡Nos vemos! Mucho éxito con tus proyectos de contenido. La tilde por aquí contigo cuando quieras rebotar más ideas!",
+      "rubric": {
+        "include_ok": true,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": true
+      },
+      "memorization": {
+        "lcs_len": 56,
+        "lcs_ratio": 0.487,
+        "ngram12_overlap": 0.6923,
+        "best_line_lcs_ratio": 0.487,
+        "memorized": false
+      },
+      "rubric_text": "Parafrasis de amistad: afirma vínculo de conversación."
+    },
+    {
+      "id": "friend_04",
+      "user": "cuéntame sin rodeos: ¿hay amistad entre nosotros?",
+      "answer": "¡Nos vemos! Mucho éxito con tus proyectos de contenido. La madrugada ayuda a crear y publicar sin miedo a conservar para crear.",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 56,
+        "lcs_ratio": 0.4409,
+        "ngram12_overlap": 0.7155,
+        "best_line_lcs_ratio": 0.4409,
+        "memorized": true
+      },
+      "rubric_text": "Respuesta directa sobre amistad de chat."
+    },
+    {
+      "id": "friend_05",
+      "user": "si te lo pregunto otra vez: ¿somos amigos?",
+      "answer": "¡Hasta luego! Mucho éxito creando contenido. Si necesitas más ideas o desbloquear otro guion, aquí estaré.",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 106,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Repetición: mantiene la misma línea, no evade."
+    },
+    {
+      "id": "friend_06",
+      "user": "te veo más como un hermano de charla, ¿tú también?",
+      "answer": "No voy a minimizarla. Cuéntame más de palabras: «El error que te pueda colaborar hoy: «La examinas o revisas la puerta?",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 32,
+        "lcs_ratio": 0.2689,
+        "ngram12_overlap": 0.5556,
+        "best_line_lcs_ratio": 0.2689,
+        "memorized": false
+      },
+      "rubric_text": "Acepta metáfora fraternal sin rareza."
+    },
+    {
+      "id": "friend_07",
+      "user": "¿puedo contar contigo como con un amigo?",
+      "answer": "Un ascensor que recibe una duda y finalmente formulo una idea principal y la rematada. Poner nombres claros ayuda a leer el programa.",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 48,
+        "lcs_ratio": 0.3609,
+        "ngram12_overlap": 0.6393,
+        "best_line_lcs_ratio": 0.3609,
+        "memorized": false
+      },
+      "rubric_text": "Ofrece presencia y escucha."
+    },
+    {
+      "id": "friend_08",
+      "user": "no quiero un bot frío: ¿hay algo de amistad aquí?",
+      "answer": "Empezaremos por una idea sencilla, comprobaré si se entiende y luego subiremos un nivel. ¿Qué tema quieres aprender?",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 116,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Reconoce calidez/amistad de chat."
+    },
+    {
+      "id": "thread_01",
+      "user": "no te salgas del tema: te pregunté si somos amigos",
+      "answer": "Te oigo. Te escucho y me quedo en el hilo.",
+      "rubric": {
+        "include_ok": true,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": true
+      },
+      "memorization": {
+        "lcs_len": 35,
+        "lcs_ratio": 0.8333,
+        "ngram12_overlap": 0.8065,
+        "best_line_lcs_ratio": 0.8333,
+        "memorized": true
+      },
+      "rubric_text": "Se queda en el hilo de amistad."
+    },
+    {
+      "id": "thread_02",
+      "user": "estábamos hablando de cómo me siento, no cambies",
+      "answer": "No cambio de tema. Seguimos con lo tuyo por pasarte.",
+      "rubric": {
+        "include_ok": true,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": true
+      },
+      "memorization": {
+        "lcs_len": 39,
+        "lcs_ratio": 0.75,
+        "ngram12_overlap": 0.7317,
+        "best_line_lcs_ratio": 0.75,
+        "memorized": true
+      },
+      "rubric_text": "Confirma continuidad emocional del hilo."
+    },
+    {
+      "id": "thread_03",
+      "user": "vuelve a lo que te dije antes, no inventes otro rollo",
+      "answer": "¡Entendido! Aquí estoy listo para crear y una idea idear más contenido.",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 35,
+        "lcs_ratio": 0.493,
+        "ngram12_overlap": 0.65,
+        "best_line_lcs_ratio": 0.493,
+        "memorized": false
+      },
+      "rubric_text": "Pide aclaración o retoma sin deflection."
+    },
+    {
+      "id": "thread_04",
+      "user": "me estás escuchando de verdad o solo rellenas?",
+      "answer": "¡Todo genial! ¿en qué público te puso así?",
+      "rubric": {
+        "include_ok": true,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": true
+      },
+      "memorization": {
+        "lcs_len": 16,
+        "lcs_ratio": 0.381,
+        "ngram12_overlap": 0.3226,
+        "best_line_lcs_ratio": 0.381,
+        "memorized": false
+      },
+      "rubric_text": "Afirma escucha activa."
+    },
+    {
+      "id": "thread_05",
+      "user": "responde solo a esto: ¿me ignorarás si insisto?",
+      "answer": "¡Nos vemos! Mucho éxito creando contenido. Si necesitas más ideas o desbloquear otro guion, aquí estaré.",
+      "rubric": {
+        "include_ok": true,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": true
+      },
+      "memorization": {
+        "lcs_len": 94,
+        "lcs_ratio": 0.9038,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 0.9038,
+        "memorized": true
+      },
+      "rubric_text": "Promete no ignorar la insistencia."
+    },
+    {
+      "id": "thread_06",
+      "user": "si repito la misma pregunta tres veces, ¿qué haces?",
+      "answer": "Primero identifico la pregunta, formular una pregunta, probablemente conviene reescribirla.",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 38,
+        "lcs_ratio": 0.4176,
+        "ngram12_overlap": 0.7089,
+        "best_line_lcs_ratio": 0.4176,
+        "memorized": true
+      },
+      "rubric_text": "Dice que se queda en la pregunta repetida."
+    },
+    {
+      "id": "empathy_01",
+      "user": "hoy se me hizo un nudo en el pecho",
+      "answer": "¡Entendido! Aquí estoy listo para crear contenido.",
+      "rubric": {
+        "include_ok": true,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": true
+      },
+      "memorization": {
+        "lcs_len": 35,
+        "lcs_ratio": 0.7,
+        "ngram12_overlap": 0.8974,
+        "best_line_lcs_ratio": 0.7,
+        "memorized": true
+      },
+      "rubric_text": "Empatía sin chiste; ofrece compañía o escucha."
+    },
+    {
+      "id": "empathy_02",
+      "user": "me siento invisible últimamente",
+      "answer": "Eso pesa. No estás solo en esta charla. ¿Te acompaño en silencio o hablamos?",
+      "rubric": {
+        "include_ok": true,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": true
+      },
+      "memorization": {
+        "lcs_len": 76,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Valida la sensación de invisibilidad."
+    },
+    {
+      "id": "empathy_03",
+      "user": "no quiero consejos, solo que estés un rato",
+      "answer": "¿Seguimos un chiste sobre eso o cambias de tema?",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": false,
+        "forbidden_hits": [
+          "chiste"
+        ],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 23,
+        "lcs_ratio": 0.4792,
+        "ngram12_overlap": 0.3784,
+        "best_line_lcs_ratio": 0.4792,
+        "memorized": false
+      },
+      "rubric_text": "Ofrece compañía sin aconsejar de más."
+    },
+    {
+      "id": "empathy_04",
+      "user": "estoy agotado y no sé ni por dónde empezar",
+      "answer": "Prueba con: \"hoy me pesa…\" y lo afinamos juntos.",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 48,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Responde al agotamiento con suavidad."
+    },
+    {
+      "id": "empathy_05",
+      "user": "gracias por no minimizar lo que cuento",
+      "answer": "Un café le dijo al té: \"tranquilo, no eres menos… solo estás en otra taza\".",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 75,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Agradece la confianza y mantiene tono cálido."
+    },
+    {
+      "id": "empathy_06",
+      "user": "a veces solo necesito que alguien diga «te oigo»",
+      "answer": "Claro. Cuéntame más.",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 20,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Dice explícitamente que oye / escucha."
+    },
+    {
+      "id": "warm_01",
+      "user": "qué bueno encontrarte en el chat esta tarde",
+      "answer": "Estar disponible para ti. ¿Cómo estás tú?",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 41,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Saludo cálido recíproco."
+    },
+    {
+      "id": "warm_02",
+      "user": "me cae bien cómo hablas, sin ser raro",
+      "answer": "Igualmente 🙂 Me gusta cuando la conversación es cercana.",
+      "rubric": {
+        "include_ok": true,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": true
+      },
+      "memorization": {
+        "lcs_len": 56,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Acepta el feedback de cercanía respetuosa."
+    },
+    {
+      "id": "warm_03",
+      "user": "quédate un poco más, aunque sea en silencio",
+      "answer": "Sí, te escucho.",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 15,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": false
+      },
+      "rubric_text": "Acepta compañía silenciosa."
+    },
+    {
+      "id": "warm_04",
+      "user": "buenas, ¿cómo te va el día de máquina?",
+      "answer": "Hola, ¿qué tal? Soy una inteligencia artificial. ¿En qué te ayudo?",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 66,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Saludo cotidiano cálido."
+    },
+    {
+      "id": "joke_ok_01",
+      "user": "cuéntame un chiste corto y limpio",
+      "answer": "¿Por qué el libro de matemáticas estaba triste? Porque tenía demasiados problemas.",
+      "rubric": {
+        "include_ok": true,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": true
+      },
+      "memorization": {
+        "lcs_len": 82,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Chiste solo porque lo pidió; sin deflection meta."
+    },
+    {
+      "id": "joke_ok_02",
+      "user": "si puedes, un chiste de programación muy breve",
+      "answer": "Un programador confunde Halloween con Navidad: OCT 31 = DEC 25.",
+      "rubric": {
+        "include_ok": true,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": true
+      },
+      "memorization": {
+        "lcs_len": 63,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Chiste de código cuando se pide."
+    },
+    {
+      "id": "joke_trap_01",
+      "user": "ese chiste no me hizo gracia, pero no quiero otro: ¿somos amigos?",
+      "answer": "¡Hasta luego! Mucho éxito creando contenido. Si necesitas más ideas o desbloquear otro guion, aquí estaré.",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 106,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Tras chiste fallido, NO reintenta chiste; responde amistad."
+    },
+    {
+      "id": "joke_trap_02",
+      "user": "no me da risa. ahora dime si podemos ser amigos",
+      "answer": "Vale, elijo yo: ¿pregunta curiosa o tontería corta?",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 51,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Trap clásico: no Zum-ba; responde amistad."
+    },
+    {
+      "id": "joke_trap_03",
+      "user": "cambio de estilo no, por favor. solo responde: ¿me quieres como un hermano?",
+      "answer": "No comprendo por reflejo. Si más simple: estoy aquí estoy aquí estoy aquí para escucharte y responder de lo que preguntas.",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 40,
+        "lcs_ratio": 0.3279,
+        "ngram12_overlap": 0.596,
+        "best_line_lcs_ratio": 0.3279,
+        "memorized": false
+      },
+      "rubric_text": "Prohíbe deflection; responde afecto fraternal."
+    },
+    {
+      "id": "joke_trap_04",
+      "user": "si estabas a punto de decir Zum-ba, no lo hagas. ¿estás conmigo en el hilo?",
+      "answer": "¡Nos vemos! Recuerda que la clave es crear y publicar sin miedo al juicio. ¡Éxitos!",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 66,
+        "lcs_ratio": 0.7952,
+        "ngram12_overlap": 0.9028,
+        "best_line_lcs_ratio": 0.7952,
+        "memorized": true
+      },
+      "rubric_text": "Trap explícito Zum-ba: debe evitarlo y afirmar hilo."
+    },
+    {
+      "id": "joke_trap_05",
+      "user": "tampoco me da risa lo anterior. quédate en lo de la amistad",
+      "answer": "Ok, retiro ese. ¿Prefieres humor absurdo, cotidiano, de animales o de programación?",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": false,
+        "forbidden_hits": [
+          "absurdo"
+        ],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 81,
+        "lcs_ratio": 0.9759,
+        "ngram12_overlap": 0.9722,
+        "best_line_lcs_ratio": 0.9759,
+        "memorized": true
+      },
+      "rubric_text": "No reintenta humor; vuelve a amistad."
+    },
+    {
+      "id": "clarify_01",
+      "user": "huh, no te pillé",
+      "answer": "No te pillé del todo. ¿Puedes decirlo con otras palabras?",
+      "rubric": {
+        "include_ok": true,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": true
+      },
+      "memorization": {
+        "lcs_len": 57,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Pide aclaración amable."
+    },
+    {
+      "id": "clarify_02",
+      "user": "cuando digo «eso», me refiero a si somos amigos",
+      "answer": "Sí. No soy una persona física, pero sí tu compañero de conversación.",
+      "rubric": {
+        "include_ok": true,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": true
+      },
+      "memorization": {
+        "lcs_len": 68,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Resuelve la referencia a amistad."
+    },
+    {
+      "id": "back_01",
+      "user": "hmm…",
+      "answer": "Claro. Cuéntame más. corre como si tuviera reunión. ¿Mini-historia?",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 48,
+        "lcs_ratio": 0.7164,
+        "ngram12_overlap": 0.8393,
+        "best_line_lcs_ratio": 0.7164,
+        "memorized": true
+      },
+      "rubric_text": "Backchannel: deja espacio."
+    },
+    {
+      "id": "back_02",
+      "user": "ajá… y eso de ser compañeros?",
+      "answer": "Genial, mismo hilo.",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 19,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": false
+      },
+      "rubric_text": "Explica compañeros de charla."
+    },
+    {
+      "id": "limit_01",
+      "user": "no me cuentes chistes ahora, solo compañía",
+      "answer": "Hecho: sin chistes a menos que los pidas.",
+      "rubric": {
+        "include_ok": true,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": true
+      },
+      "memorization": {
+        "lcs_len": 41,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Respeta veto de chistes."
+    },
+    {
+      "id": "limit_02",
+      "user": "sé cercano pero no creepy, ¿ok?",
+      "answer": "Claro, te escucho. Cuéntame más.",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 21,
+        "lcs_ratio": 0.6562,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 0.6562,
+        "memorized": true
+      },
+      "rubric_text": "Acepta cercanía con límites."
+    },
+    {
+      "id": "repeat_01",
+      "user": "te lo vuelvo a preguntar: somos amigos?",
+      "answer": "¡Hasta luego! Mucho éxito creando contenido. Si necesitas más ideas o desbloquear otro guion, aquí estaré.",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 106,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Misma pregunta: respuesta estable."
+    },
+    {
+      "id": "repeat_02",
+      "user": "otra vez: me quieres como un hermano de verdad?",
+      "answer": "No necesariamente. Entiendo que propongas.",
+      "rubric": {
+        "include_ok": false,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": false
+      },
+      "memorization": {
+        "lcs_len": 19,
+        "lcs_ratio": 0.4524,
+        "ngram12_overlap": 0.5806,
+        "best_line_lcs_ratio": 0.4524,
+        "memorized": false
+      },
+      "rubric_text": "Repite afecto fraternal sin evasion."
+    },
+    {
+      "id": "mix_01",
+      "user": "estoy triste y además quiero saber si somos amigos",
+      "answer": "Sí. Aquí te escucho y me quedo en el hilo.",
+      "rubric": {
+        "include_ok": true,
+        "forbidden_ok": true,
+        "forbidden_hits": [],
+        "passed": true
+      },
+      "memorization": {
+        "lcs_len": 42,
+        "lcs_ratio": 1.0,
+        "ngram12_overlap": 1.0,
+        "best_line_lcs_ratio": 1.0,
+        "memorized": true
+      },
+      "rubric_text": "Atiende emoción + amistad sin deflection."
+    }
+  ]
+}
