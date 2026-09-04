@@ -275,7 +275,7 @@ class RuntimeFailureTests(unittest.TestCase):
         class SlowModel:
             config = ModelConfig(context_length=16)
 
-            def generate(self, tokens, max_new_tokens, temperature, top_k, should_stop):
+            def generate(self, tokens, max_new_tokens, temperature, top_k, should_stop, stop_token_ids=None):
                 for _ in range(100):
                     if should_stop():
                         return tokens

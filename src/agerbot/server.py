@@ -23,6 +23,7 @@ from typing import Any
 import torch
 
 from .data import load_corpus, random_batch, split_corpus
+from .generate import normalize_chat_text, trim_assistant_completion
 from .model import Agerbot, ModelConfig
 from .runtime import save_checkpoint, select_device
 from .tokenizer import tokenizer_from_dict, tokenizer_identifier
@@ -360,9 +361,24 @@ def _resolve_training_corpus(
     )
 
 
+def _ensure_dialogue_format(text: str) -> str:
+    """Si el pegado no trae turnos Usuario/Agerbot, lo envuelve en un diálogo."""
+    stripped = text.strip()
+    if not stripped:
+        return stripped
+    if any(line.startswith("Usuario:") for line in stripped.splitlines()):
+        return stripped + "\n"
+    return (
+        "Usuario: Explícame esto con tus palabras, sin copiar el texto tal cual.\n"
+        f"Agerbot: {stripped}\n"
+    )
+
+
 def _merge_training_corpus(base_text: str, new_text: str) -> tuple[str, int, int]:
+    formatted = _ensure_dialogue_format(new_text)
     base_blocks = [_sanitize_training_block(block) for block in _training_blocks(base_text)]
-    new_blocks = [_sanitize_training_block(block) for block in _training_blocks(new_text)]
+    new_blocks = [_sanitize_training_block(block) for block in _training_blocks(formatted)]
+    new_blocks = [block for block in new_blocks if block]
     if not base_blocks:
         raise RuntimeAPIError(
             "base_corpus_empty", "El corpus del modelo principal está vacío."
@@ -372,11 +388,9 @@ def _merge_training_corpus(base_text: str, new_text: str) -> tuple[str, int, int
             "data_too_short", "El texto nuevo no contiene bloques de entrenamiento válidos."
         )
 
-    # Repetimos únicamente los datos nuevos hasta darles suficiente peso, pero
-    # siempre conservamos el corpus completo del modelo principal. Así el ajuste
-    # aprende la nueva materia sin convertirla en el único comportamiento.
-    min_new_characters = 150_000
-    repetitions = max(1, min_new_characters // max(1, len(new_text)))
+    # Pocas repeticiones: mezcla con el corpus principal para generalizar,
+    # no para que el modelo recote el pegado.
+    repetitions = 2
     repeated_new_blocks: list[str] = []
     for _ in range(repetitions):
         shuffled = new_blocks.copy()
@@ -386,7 +400,7 @@ def _merge_training_corpus(base_text: str, new_text: str) -> tuple[str, int, int
     merged_blocks = base_blocks + repeated_new_blocks
     random.shuffle(merged_blocks)
     merged_text = "\n\n".join(merged_blocks) + "\n"
-    return merged_text, len(base_text), len(new_text)
+    return merged_text, len(base_text), len(formatted)
 
 
 def _build_incremental_model(
@@ -585,12 +599,14 @@ class AgerbotRuntime:
         try:
             _, prompt_tokens = self._build_context_prompt(history, message)
             inputs = torch.tensor([prompt_tokens], dtype=torch.long, device=self.device)
+            newline_ids = set(self.tokenizer.encode("\n"))
             output = self.model.generate(
                 inputs,
                 max_new_tokens=generation["maxNewTokens"],
                 temperature=generation["temperature"],
                 top_k=generation["topK"],
                 should_stop=cancel_event.is_set,
+                stop_token_ids=newline_ids or None,
             )
             if cancel_event.is_set():
                 raise RuntimeAPIError(
@@ -601,22 +617,7 @@ class AgerbotRuntime:
                 )
             generated = output[0].tolist()[len(prompt_tokens) :]
             raw_content = self.tokenizer.decode(generated)
-            stop_markers = [
-                "\n",
-                "\n\n",
-                "\nUsuario:",
-                "\nPregunta:",
-                "\nConversación:",
-                "\nConsulta:",
-                "\nChat:",
-                "\nInteracción:",
-                "\nAgerbot:",
-            ]
-            content = raw_content
-            for marker in stop_markers:
-                if marker in content:
-                    content = content.split(marker)[0]
-            content = _sanitize_generated_content(content)
+            content = _sanitize_generated_content(trim_assistant_completion(raw_content))
             if not content:
                 content = "No produje texto en esta ejecución. Inténtalo de nuevo."
             return {
@@ -696,8 +697,8 @@ class AgerbotRuntime:
         lines: list[str] = []
         for item in history:
             speaker = "Usuario" if item["role"] == "user" else "Agerbot"
-            lines.append(f"{speaker}: {item['content']}")
-        lines.append(f"Usuario: {message}")
+            lines.append(f"{speaker}: {normalize_chat_text(item['content']).strip()}")
+        lines.append(f"Usuario: {normalize_chat_text(message).strip()}")
         lines.append("Agerbot:")
         return "\n".join(lines)
 
@@ -802,8 +803,8 @@ class TrainingManager:
             if self.status == "training":
                 raise RuntimeAPIError("already_training", "Ya hay un entrenamiento en curso.", status=HTTPStatus.CONFLICT)
             
-            clean_text = text.strip()
-            if len(clean_text) < 20:
+            clean_text = _ensure_dialogue_format(text)
+            if len(clean_text.strip()) < 20:
                 raise RuntimeAPIError("data_too_short", "El texto es demasiado corto. Escribe al menos un par de diálogos.")
 
             if self.server is None:
@@ -823,8 +824,9 @@ class TrainingManager:
                     status=HTTPStatus.SERVICE_UNAVAILABLE,
                 )
             
-            timestamp = time.strftime("%Y%m%d_%H%M%S")
-            clean_name = re.sub(r"[^a-zA-Z0-9_-]", "_", name.strip()) if name.strip() else f"modelo_{timestamp}"
+            # Siempre es el mismo Agerbot. El nombre opcional solo se anota en el log.
+            note = re.sub(r"[^a-zA-Z0-9_-]", "_", name.strip()) if name.strip() else ""
+            clean_name = "agerbot"
             self.session_name = clean_name
             self.status = "training"
             self.step = 0
@@ -839,7 +841,8 @@ class TrainingManager:
             self.base_corpus_characters = 0
             self.new_corpus_characters = len(clean_text)
             self.merged_corpus_characters = 0
-            self.logs = [f"🚀 Iniciando entrenamiento: {clean_name} ({duration_minutes} min)..."]
+            note_bit = f" ({note})" if note else ""
+            self.logs = [f"🚀 Entrenando el mismo Agerbot{note_bit} ({duration_minutes} min)..."]
             
             self._thread = threading.Thread(
                 target=self._run_training,
@@ -859,7 +862,7 @@ class TrainingManager:
         try:
             processed_dir = Path("data/processed")
             processed_dir.mkdir(parents=True, exist_ok=True)
-            data_file = processed_dir / f"{session_name}.txt"
+            data_file = processed_dir / "agerbot.txt"
 
             base_manifest = load_checkpoint_manifest(base_checkpoint_path)
             base_checkpoint = torch.load(
@@ -910,7 +913,9 @@ class TrainingManager:
                     "El tokenizador del modelo principal no coincide con su vocabulario.",
                 )
             model, model_config, base_context_length = _build_incremental_model(
-                base_checkpoint, device
+                base_checkpoint,
+                device,
+                target_context_length=base_model_config.context_length,
             )
             batch_size, gradient_accumulation = _training_batch_plan(
                 model_config.context_length
@@ -924,7 +929,7 @@ class TrainingManager:
             # Los ajustes encadenados habían reducido la tasa hasta volver
             # simbólico el aprendizaje. Conservamos un ajuste pequeño, pero
             # suficiente para que los nuevos turnos de conversación se aprendan.
-            learning_rate = min(max(base_learning_rate * 4.0, 0.000005), 0.00005)
+            learning_rate = min(max(base_learning_rate, 0.00008), 0.00015)
             optimizer = torch.optim.AdamW(
                 model.parameters(), lr=learning_rate, weight_decay=0.05
             )
@@ -1034,7 +1039,7 @@ class TrainingManager:
                 "model": {
                     "name": "Agerbot",
                     "version": "custom",
-                    "trainingName": session_name,
+                    "trainingName": "agerbot",
                     "architecture": "agerbot-transformer",
                     "tokenizer": tokenizer_identifier(tokenizer.to_dict()),
                     "parameters": model.parameter_count(),
@@ -1068,7 +1073,7 @@ class TrainingManager:
                 self.status = "completed"
                 self.checkpoint_path = str(best_checkpoint_path)
                 self.elapsed_seconds = max_duration
-                self.logs.append(f"🎉 ¡Entrenamiento Terminado! Nuevo modelo publicado y activo ({model.parameter_count():,} parámetros, {best_checkpoint_path.stat().st_size / (1024*1024):.1f} MB).")
+                self.logs.append(f"🎉 Agerbot actualizado ({model.parameter_count():,} parámetros, {best_checkpoint_path.stat().st_size / (1024*1024):.1f} MB). Pregúntale en el chat con otras palabras.")
         except Exception as e:
             with self.lock:
                 self.status = "failed"
