@@ -105,6 +105,20 @@ def run_bank_score(
     }
 
 
+def bank_objective(accuracy: float, memorization_rate: float, mode: str = "acc_minus_mem") -> float:
+    """Ranking score for held-out bank checkpoint selection.
+
+    - acc_minus_mem: maximize accuracy - memorization_rate
+    - gate_prefer: hard-bonus any (acc>0.475 & mem<0.55); else max acc with soft mem penalty
+    """
+    if mode == "gate_prefer":
+        if accuracy > 0.475 and memorization_rate < 0.55:
+            return 10.0 + accuracy - memorization_rate
+        mem_pen = max(0.0, memorization_rate - 0.40) * 2.0
+        return accuracy - mem_pen
+    return accuracy - memorization_rate
+
+
 def train(config_path: str, resume: str | None = None) -> Path:
     config = load_json(config_path)
     seed_everything(config["seed"])
@@ -276,9 +290,16 @@ def train(config_path: str, resume: str | None = None) -> Path:
             )
             if was_training:
                 model.train()
+            score_mode = str(bank_cfg.get("score_mode", "acc_minus_mem"))
+            objective = bank_objective(
+                metrics["accuracy"], metrics["memorization_rate"], mode=score_mode
+            )
+            metrics = {**metrics, "objective": round(objective, 4), "score_mode": score_mode}
+            # Keep legacy 'score' as acc-mem; rank by objective
             print(
                 f"bank_eval step={step + 1:04d} acc={metrics['accuracy']} "
                 f"mem={metrics['memorization_rate']} score={metrics['score']} "
+                f"objective={metrics['objective']} mode={score_mode} "
                 f"n={metrics['n_items']}"
             )
             # Lean candidate for post-hoc full-bank reselect
@@ -298,8 +319,8 @@ def train(config_path: str, resume: str | None = None) -> Path:
                 store_model_float16=store_fp16,
                 include_optimizer=False,
             )
-            if metrics["score"] > best_bank_score:
-                best_bank_score = metrics["score"]
+            if metrics.get("objective", metrics["score"]) > best_bank_score:
+                best_bank_score = float(metrics.get("objective", metrics["score"]))
                 bank_without_improvement = 0
                 best_payload = {
                     "format_version": 1,
