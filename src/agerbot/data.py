@@ -139,11 +139,15 @@ def augment_multitarget_text(
     max_remixes_per_user: int = 2,
     dedupe_near_identical: bool = True,
     dedupe_threshold: float = 0.90,
+    marker_variants: int = 0,
+    user_markers: tuple[str, ...] | None = None,
 ) -> str:
     """Añade remixes Usuario/Agerbot solo con frases ya presentes en el corpus.
 
     Para intenciones con varias respuestas distintas, empareja usuarios existentes
     con otras respuestas existentes del mismo grupo (multi-target sin inventar).
+    Opcionalmente reescribe pares existentes con otros marcadores de usuario
+    del corpus (sin inventar texto de diálogo).
     """
     pairs = parse_dialogue_pairs(text)
     threshold = dedupe_threshold if dedupe_near_identical else None
@@ -151,6 +155,7 @@ def augment_multitarget_text(
     rng = random.Random(seed)
     extras: list[str] = []
     seen: set[tuple[str, str]] = set(pairs)
+    seen_marker_lines: set[str] = set()
 
     multi_keys = [
         key
@@ -177,6 +182,25 @@ def augment_multitarget_text(
                     break
                 extras.append(f"Usuario: {user}\nAgerbot: {reply}")
                 seen.add((user, reply))
+
+    markers = user_markers or USER_MARKERS
+    marker_budget = max(0, int(marker_variants))
+    if marker_budget and len(extras) < max_extra_turns:
+        pair_list = list(pairs)
+        rng.shuffle(pair_list)
+        for user, reply in pair_list:
+            if marker_budget <= 0 or len(extras) >= max_extra_turns:
+                break
+            alt = [m for m in markers if m != "Usuario:"]
+            if not alt:
+                break
+            marker = rng.choice(alt)
+            line = f"{marker} {user}\nAgerbot: {reply}"
+            if line in seen_marker_lines:
+                continue
+            seen_marker_lines.add(line)
+            extras.append(line)
+            marker_budget -= 1
 
     if not extras:
         return text

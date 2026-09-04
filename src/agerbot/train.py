@@ -135,6 +135,7 @@ def train(config_path: str, resume: str | None = None) -> Path:
             max_remixes_per_user=int(multitarget.get("max_remixes_per_user", 2)),
             dedupe_near_identical=bool(multitarget.get("dedupe_near_identical", True)),
             dedupe_threshold=float(multitarget.get("dedupe_threshold", 0.90)),
+            marker_variants=int(multitarget.get("marker_variants", 0)),
         )
         print(
             f"multitarget=on chars_before={before:,} chars_after={len(corpus_text):,}"
@@ -158,13 +159,32 @@ def train(config_path: str, resume: str | None = None) -> Path:
     evaluations_without_improvement = 0
     bank_without_improvement = 0
     if resume:
+        # CLI --resume continues optimizer/step/best scores when present.
         checkpoint = load_checkpoint(resume, map_location=device, weights_only=False)
         model.load_state_dict(checkpoint["model_state"])
         if "optimizer_state" in checkpoint:
             optimizer.load_state_dict(checkpoint["optimizer_state"])
-        start_step = checkpoint["step"] + 1
-        best_val_loss = checkpoint.get("best_val_loss", best_val_loss)
-        best_bank_score = checkpoint.get("best_bank_score", best_bank_score)
+        start_step = int(checkpoint.get("step", -1)) + 1
+        best_val_loss = checkpoint.get("best_val_loss", best_val_loss) or best_val_loss
+        raw_bank = checkpoint.get("best_bank_score", best_bank_score)
+        best_bank_score = float(raw_bank) if raw_bank is not None else best_bank_score
+        print(f"resume={resume} start_step={start_step}")
+    elif config.get("init_checkpoint"):
+        # Weights-only finetune from a prior publish ckpt (fresh AdamW + counters).
+        init_path = str(config["init_checkpoint"])
+        checkpoint = load_checkpoint(init_path, map_location=device, weights_only=False)
+        src_cfg = checkpoint.get("model_config") or {}
+        for key in ("d_model", "n_heads", "n_layers", "context_length"):
+            if key in src_cfg and src_cfg[key] != getattr(model_config, key):
+                raise ValueError(
+                    f"init_checkpoint arch mismatch on {key}: "
+                    f"{src_cfg[key]} vs {getattr(model_config, key)}"
+                )
+        model.load_state_dict(checkpoint["model_state"])
+        start_step = 0
+        best_val_loss = float("inf")
+        best_bank_score = float("-inf")
+        print(f"init_checkpoint={init_path} weights_only=1 start_step=0")
 
     checkpoint_dir = Path(config["checkpoint_dir"])
     latest_path = checkpoint_dir / "latest.pt"
