@@ -4,7 +4,12 @@ from pathlib import Path
 
 import torch
 
-from agerbot.data import augment_multitarget_text, parse_dialogue_pairs
+from agerbot.data import (
+    augment_multitarget_text,
+    dedupe_near_identical_replies,
+    parse_dialogue_pairs,
+    replies_near_duplicate,
+)
 from agerbot.model import Agerbot, ModelConfig
 from agerbot.runtime import load_checkpoint, save_checkpoint
 from agerbot.tokenizer import BpeTokenizer, tokenizer_from_dict, tokenizer_identifier
@@ -69,6 +74,23 @@ class DensifyV1Tests(unittest.TestCase):
             model2.load_state_dict(loaded["model_state"])
             weight = next(model2.parameters())
             self.assertEqual(weight.dtype, torch.float32)
+
+
+    def test_near_identical_reply_dedupe(self) -> None:
+        a = "Sí. Amistad de chat: respeto, escucha y presencia."
+        b = "Sí! Amistad de chat: respeto, escucha y presencia 🙂"
+        self.assertTrue(replies_near_duplicate(a, b, threshold=0.88))
+        kept = dedupe_near_identical_replies([a, b, "Hola distinta respuesta"], threshold=0.88)
+        self.assertEqual(len(kept), 2)
+
+    def test_multitarget_remix_cap(self) -> None:
+        aug = augment_multitarget_text(
+            SAMPLE, seed=1, max_extra_turns=10, max_remixes_per_user=4
+        )
+        # No inventa respuestas nuevas
+        originals = {r for _, r in parse_dialogue_pairs(SAMPLE)}
+        for _, reply in parse_dialogue_pairs(aug):
+            self.assertIn(reply, originals)
 
 
 if __name__ == "__main__":

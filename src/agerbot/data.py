@@ -4,12 +4,11 @@ from __future__ import annotations
 
 import random
 import re
-from collections import defaultdict
 from pathlib import Path
 
 import torch
 
-from .tokenizer import ByteTokenizer, BpeTokenizer, CharTokenizer, TokenizerAny
+from .tokenizer import TokenizerAny
 
 USER_MARKERS = ("Usuario:", "Pregunta:", "Consulta:", "Chat:", "Interacción:")
 ASSISTANT_MARKERS = ("Agerbot:",)
@@ -49,7 +48,67 @@ def normalize_user_intent(text: str) -> str:
     return lowered
 
 
-def group_reply_variants(pairs: list[tuple[str, str]]) -> dict[str, dict[str, set[str]]]:
+def normalize_reply_for_dedupe(text: str) -> str:
+    """Colapsa respuestas casi idénticas (puntuación / emoji / espacios)."""
+    lowered = text.casefold()
+    lowered = re.sub(r"[\U0001F300-\U0001FAFF]", " ", lowered)
+    lowered = re.sub(r"[¿?¡!.,;:…\"\'`´\-—–()\[\]{}]+", " ", lowered)
+    lowered = re.sub(r"\s+", " ", lowered).strip()
+    return lowered
+
+
+def _lcs_len(a: str, b: str) -> int:
+    if not a or not b:
+        return 0
+    if len(a) > 240:
+        a = a[:240]
+    if len(b) > 240:
+        b = b[:240]
+    n, m = len(a), len(b)
+    prev = [0] * (m + 1)
+    best = 0
+    for i in range(1, n + 1):
+        cur = [0] * (m + 1)
+        ai = a[i - 1]
+        for j in range(1, m + 1):
+            if ai == b[j - 1]:
+                cur[j] = prev[j - 1] + 1
+                if cur[j] > best:
+                    best = cur[j]
+        prev = cur
+    return best
+
+
+def replies_near_duplicate(a: str, b: str, threshold: float = 0.90) -> bool:
+    na, nb = normalize_reply_for_dedupe(a), normalize_reply_for_dedupe(b)
+    if not na or not nb:
+        return False
+    if na == nb:
+        return True
+    shorter = min(len(na), len(nb))
+    if shorter < 12:
+        return na == nb
+    lcs = _lcs_len(na, nb)
+    return (lcs / shorter) >= threshold
+
+
+def dedupe_near_identical_replies(
+    replies: list[str], *, threshold: float = 0.90
+) -> list[str]:
+    """Conserva solo respuestas suficientemente distintas (frases ya existentes)."""
+    kept: list[str] = []
+    for reply in replies:
+        if any(replies_near_duplicate(reply, other, threshold) for other in kept):
+            continue
+        kept.append(reply)
+    return kept
+
+
+def group_reply_variants(
+    pairs: list[tuple[str, str]],
+    *,
+    dedupe_threshold: float | None = 0.90,
+) -> dict[str, dict[str, set[str]]]:
     """Por intención normalizada: usuarios originales y respuestas distintas."""
     groups: dict[str, dict[str, set[str]]] = {}
     for user, reply in pairs:
@@ -58,6 +117,15 @@ def group_reply_variants(pairs: list[tuple[str, str]]) -> dict[str, dict[str, se
             continue
         bucket = groups.setdefault(key, {"users": set(), "replies": set()})
         bucket["users"].add(user)
+        if dedupe_threshold is None:
+            bucket["replies"].add(reply)
+            continue
+        # Solo añadir si no es near-dupe de una ya guardada
+        if any(
+            replies_near_duplicate(reply, existing, dedupe_threshold)
+            for existing in bucket["replies"]
+        ):
+            continue
         bucket["replies"].add(reply)
     return groups
 
@@ -68,6 +136,9 @@ def augment_multitarget_text(
     seed: int = 0,
     max_extra_turns: int = 4000,
     min_variants: int = 2,
+    max_remixes_per_user: int = 2,
+    dedupe_near_identical: bool = True,
+    dedupe_threshold: float = 0.90,
 ) -> str:
     """Añade remixes Usuario/Agerbot solo con frases ya presentes en el corpus.
 
@@ -75,7 +146,8 @@ def augment_multitarget_text(
     con otras respuestas existentes del mismo grupo (multi-target sin inventar).
     """
     pairs = parse_dialogue_pairs(text)
-    groups = group_reply_variants(pairs)
+    threshold = dedupe_threshold if dedupe_near_identical else None
+    groups = group_reply_variants(pairs, dedupe_threshold=threshold)
     rng = random.Random(seed)
     extras: list[str] = []
     seen: set[tuple[str, str]] = set(pairs)
@@ -100,8 +172,7 @@ def augment_multitarget_text(
             if not candidates:
                 continue
             rng.shuffle(candidates)
-            # Un remix por frase de usuario multi-respuesta (capado).
-            for reply in candidates[:2]:
+            for reply in candidates[: max(1, max_remixes_per_user)]:
                 if len(extras) >= max_extra_turns:
                     break
                 extras.append(f"Usuario: {user}\nAgerbot: {reply}")
