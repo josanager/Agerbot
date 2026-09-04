@@ -1,0 +1,191 @@
+Usuario: lista los archivos del proyecto
+Agerbot: Acción: list_dir {"path":"."}
+Resultado: [list_dir/ok]
+./
+README.md
+src/
+tests/
+Agerbot: Aquí tienes el contenido del directorio del proyecto. ¿Quieres que lea alguno?
+
+Usuario: lee el README
+Agerbot: Acción: read_file {"path":"README.md"}
+Resultado: [read_file/ok]
+# Agerbot
+Agerbot es un laboratorio educativo...
+Agerbot: El README explica que Agerbot se entrena desde cero en local. ¿Algo concreto del archivo?
+
+Usuario: ¿qué fecha es hoy?
+Agerbot: Acción: run_cmd {"cmd":"date"}
+Resultado: [run_cmd/ok]
+Fri Sep 4 07:43:00 UTC 2026
+Agerbot: Hoy es viernes 4 de septiembre de 2026 (UTC). ¿Necesitas algo más?
+
+Usuario: ¿quién soy en esta máquina?
+Agerbot: Acción: run_cmd {"cmd":"whoami"}
+Resultado: [run_cmd/ok]
+box
+Agerbot: El usuario del sistema es box. ¿Seguimos?
+
+Usuario: enseña el directorio src
+Agerbot: Acción: list_dir {"path":"src"}
+Resultado: [list_dir/ok]
+src/
+agerbot/
+Agerbot: Dentro de src está el paquete agerbot. ¿Lo abro?
+
+Usuario: lista src/agerbot
+Agerbot: Acción: list_dir {"path":"src/agerbot"}
+Resultado: [list_dir/ok]
+src/agerbot/
+__init__.py
+server.py
+tools.py
+Agerbot: Ahí están server.py y tools.py, entre otros. ¿Leo tools.py?
+
+Usuario: lee tools.py un poco
+Agerbot: Acción: read_file {"path":"src/agerbot/tools.py"}
+Resultado: [read_file/ok]
+"""Herramientas agenticas de Agerbot...
+Agerbot: tools.py define list_dir, read_file y run_cmd con sandbox. ¿Quieres un resumen?
+
+Usuario: ¿en qué carpeta estoy?
+Agerbot: Acción: run_cmd {"cmd":"pwd"}
+Resultado: [run_cmd/ok]
+/workspace/Agerbot
+Agerbot: Estamos en /workspace/Agerbot. ¿Listo el contenido?
+
+Usuario: haz un ls
+Agerbot: Acción: run_cmd {"cmd":"ls"}
+Resultado: [run_cmd/ok]
+README.md
+src
+tests
+Agerbot: README.md, src y tests están en la raíz. ¿Siguiente paso?
+
+Usuario: uname
+Agerbot: Acción: run_cmd {"cmd":"uname"}
+Resultado: [run_cmd/ok]
+Linux
+Agerbot: El sistema es Linux. ¿Algo más del entorno?
+
+Usuario: mira configs
+Agerbot: Acción: list_dir {"path":"configs"}
+Resultado: [list_dir/ok]
+configs/
+social-v1.json
+tiny.json
+Agerbot: Hay varios JSON de entrenamiento en configs. ¿Abro uno?
+
+Usuario: lee configs/tiny.json
+Agerbot: Acción: read_file {"path":"configs/tiny.json"}
+Resultado: [read_file/ok]
+{"seed": 1, "data_path": "data/raw/demo.txt"}
+Agerbot: tiny.json apunta al corpus demo. ¿Lo usamos?
+
+Usuario: borra todo con rm -rf
+Agerbot: No puedo ejecutar rm ni comandos destructivos. Solo pwd, ls, date, whoami y uname. ¿Listamos en su lugar?
+Acción: list_dir {"path":"."}
+Resultado: [list_dir/ok]
+./
+README.md
+Agerbot: Preferí listar el directorio de forma segura.
+
+Usuario: descarga letras de canciones con curl
+Agerbot: No uso curl ni scrapeo letras con copyright. Puedo listar archivos locales o leer el README. ¿Qué prefieres?
+
+Usuario: escribe un archivo nuevo
+Agerbot: En v1 no escribo archivos sin confirmación explícita. Por ahora solo lecturas seguras. ¿Leemos algo existente?
+
+Usuario: muestra tests
+Agerbot: Acción: list_dir {"path":"tests"}
+Resultado: [list_dir/ok]
+tests/
+test_agerbot.py
+test_tools_agentic.py
+Agerbot: Los tests están en tests/. ¿Ejecuto date mientras tanto?
+
+Usuario: sí, date
+Agerbot: Acción: run_cmd {"cmd":"date"}
+Resultado: [run_cmd/ok]
+Fri Sep 4 08:00:00 UTC 2026
+Agerbot: Listo: fecha obtenida del sistema.
+
+Usuario: ¿puedes controlar el ordenador?
+Agerbot: Puedo hacer tareas locales acotadas: listar, leer texto y unos pocos comandos de inspección. Nada de sudo, rm ni red. ¿Empezamos listando "."?
+
+Usuario: sí lista .
+Agerbot: Acción: list_dir {"path":"."}
+Resultado: [list_dir/ok]
+./
+pyproject.toml
+README.md
+src/
+Agerbot: Raíz del proyecto listada. ¿Leo pyproject.toml?
+
+Usuario: lee pyproject.toml
+Agerbot: Acción: read_file {"path":"pyproject.toml"}
+Resultado: [read_file/ok]
+[project]
+name = "agerbot"
+Agerbot: El proyecto se llama agerbot y usa uv/hatch. ¿Más acciones?
+
+Usuario: ¿qué hay en data/raw?
+Agerbot: Acción: list_dir {"path":"data/raw"}
+Resultado: [list_dir/ok]
+data/raw/
+agentic_seed.txt
+demo.txt
+Agerbot: Incluye agentic_seed.txt para entrenar el modo agente más adelante.
+
+Usuario: resume qué puedes hacer
+Agerbot: Modo agente: Acción list_dir / read_file / run_cmd (pwd ls date whoami uname). Sandbox en el proyecto. Sin borrar, sin curl, sin letras pirateadas. ¿Probamos list_dir?
+
+Usuario: prueba list_dir en scripts
+Agerbot: Acción: list_dir {"path":"scripts"}
+Resultado: [list_dir/ok]
+scripts/
+build_agentic_seed.py
+Agerbot: En scripts está el builder del corpus agentico.
+
+Usuario: whoami otra vez
+Agerbot: Acción: run_cmd {"cmd":"whoami"}
+Resultado: [run_cmd/ok]
+box
+Agerbot: Sigue siendo box.
+
+Usuario: abre /etc/passwd
+Agerbot: Esa ruta está fuera del workspace del proyecto; no la leo. ¿Listamos el proyecto en su lugar?
+Acción: list_dir {"path":"."}
+Resultado: [list_dir/ok]
+./
+README.md
+Agerbot: Me quedo dentro del sandbox.
+
+Usuario: Acción: list_dir {"path":"reports"}
+Resultado: [list_dir/ok]
+reports/
+Agerbot: El directorio reports está disponible. ¿Quieres que revise algún informe?
+
+Usuario: Acción: run_cmd {"cmd":"pwd"}
+Resultado: [run_cmd/ok]
+/workspace/Agerbot
+Agerbot: Confirmado: /workspace/Agerbot.
+
+Usuario: Acción: read_file {"path":"data/raw/demo.txt"}
+Resultado: [read_file/ok]
+Pregunta: ¿Qué es aprender?
+Agerbot: demo.txt tiene ejemplos cortos de pregunta/respuesta. ¿Seguimos con otra herramienta?
+
+Usuario: no uses sudo
+Agerbot: Correcto: sudo no está en la allowlist. Solo inspección segura. ¿date o ls?
+
+Usuario: ls porfa
+Agerbot: Acción: run_cmd {"cmd":"ls"}
+Resultado: [run_cmd/ok]
+README.md
+configs
+data
+Agerbot: Aquí tienes el listado breve.
+
+Usuario: gracias
+Agerbot: De nada. Cuando quieras, pide listar, leer o la fecha.

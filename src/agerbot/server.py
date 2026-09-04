@@ -27,6 +27,13 @@ from .generate import normalize_chat_text, trim_assistant_completion
 from .model import Agerbot, ModelConfig
 from .runtime import save_checkpoint, select_device
 from .tokenizer import tokenizer_from_dict, tokenizer_identifier
+from .tools import (
+    AgenticTrace,
+    ToolRuntime,
+    extract_acciones,
+    format_resultado,
+    run_acciones,
+)
 from .train import estimate_loss
 from .web_ui import WEB_UI_HTML
 
@@ -40,6 +47,8 @@ MAX_MESSAGE_BYTES = 16 * 1024
 MAX_HISTORY_ITEMS = 32
 MAX_HISTORY_BYTES = 64 * 1024
 MAX_CONTEXT_HISTORY_ITEM_CHARS = 320
+MAX_AGENTIC_LOOPS = 3
+DEFAULT_AGENTIC = True
 NEXT_CONTEXT_LENGTH = 1024
 REFERENCE_BATCH_SIZE = 16
 REFERENCE_CONTEXT_LENGTH = 256
@@ -468,7 +477,17 @@ def _training_batch_plan(context_length: int) -> tuple[int, int]:
 
 
 class AgerbotRuntime:
-    def __init__(self, checkpoint_path: str | Path, requested_device: str = "auto") -> None:
+    def __init__(
+        self,
+        checkpoint_path: str | Path,
+        requested_device: str = "auto",
+        *,
+        agentic: bool = DEFAULT_AGENTIC,
+        workspace: str | Path | None = None,
+    ) -> None:
+        self.agentic_default = bool(agentic)
+        root = Path(workspace).expanduser().resolve() if workspace else Path.cwd().resolve()
+        self.tool_runtime = ToolRuntime(workspace=root)
         self.checkpoint_path = Path(checkpoint_path).expanduser().resolve()
         self.manifest = load_checkpoint_manifest(self.checkpoint_path)
         self.device = select_device(requested_device)
@@ -546,6 +565,7 @@ class AgerbotRuntime:
                 "tokenizer": self.tokenizer_name,
                 "contextLength": self.model.config.context_length,
             },
+            "agentic": self.agentic_default,
         }
 
     def capabilities(self) -> dict[str, Any]:
@@ -572,6 +592,13 @@ class AgerbotRuntime:
                 "supported": True,
                 "recommendedDevice": self.device.type,
             },
+            "agentic": {
+                "supported": True,
+                "enabledByDefault": self.agentic_default,
+                "maxLoops": MAX_AGENTIC_LOOPS,
+                "tools": ["list_dir", "read_file", "run_cmd"],
+                "workspace": str(self.tool_runtime.workspace),
+            },
         }
 
     def cancel(self, conversation_id: str) -> bool:
@@ -583,7 +610,7 @@ class AgerbotRuntime:
             return True
 
     def chat(self, payload: dict[str, Any]) -> dict[str, Any]:
-        conversation_id, message, history, generation = self._validate_chat(payload)
+        conversation_id, message, history, generation, agentic = self._validate_chat(payload)
         cancel_event = threading.Event()
         with self._active_lock:
             if conversation_id in self._active:
@@ -596,36 +623,66 @@ class AgerbotRuntime:
             self._active[conversation_id] = cancel_event
 
         started = time.monotonic()
+        total_generated = 0
+        prompt_token_count = 0
+        trace = AgenticTrace()
         try:
-            _, prompt_tokens = self._build_context_prompt(history, message)
-            inputs = torch.tensor([prompt_tokens], dtype=torch.long, device=self.device)
-            newline_ids = set(self.tokenizer.encode("\n"))
-            output = self.model.generate(
-                inputs,
-                max_new_tokens=generation["maxNewTokens"],
-                temperature=generation["temperature"],
-                top_k=generation["topK"],
-                should_stop=cancel_event.is_set,
-                stop_token_ids=newline_ids or None,
+            continuation = ""
+            if agentic:
+                user_calls = extract_acciones(message)
+                if user_calls:
+                    results, block = run_acciones(
+                        message, self.tool_runtime, max_calls=MAX_AGENTIC_LOOPS
+                    )
+                    trace.add("user", user_calls[:MAX_AGENTIC_LOOPS], results)
+                    continuation = block
+
+            content, gen_count, prompt_token_count = self._generate_reply(
+                history, message, generation, cancel_event, continuation=continuation
             )
-            if cancel_event.is_set():
-                raise RuntimeAPIError(
-                    "generation_cancelled",
-                    "La generación de Agerbot fue cancelada.",
-                    status=HTTPStatus.CONFLICT,
-                    retryable=True,
+            total_generated += gen_count
+
+            loops = 0
+            while agentic and loops < MAX_AGENTIC_LOOPS:
+                calls = extract_acciones(content)
+                if not calls:
+                    break
+                results, block = run_acciones(
+                    content, self.tool_runtime, max_calls=MAX_AGENTIC_LOOPS - loops
                 )
-            generated = output[0].tolist()[len(prompt_tokens) :]
-            raw_content = self.tokenizer.decode(generated)
-            content = _sanitize_generated_content(trim_assistant_completion(raw_content))
+                used = extract_acciones(content)[: MAX_AGENTIC_LOOPS - loops]
+                trace.add("model", used, results)
+                loops += 1
+                # El modelo emitió Acción; inyectamos Resultado y pedimos continuación.
+                follow = f"{content.strip()}\n{block}"
+                next_content, gen_count, ptoks = self._generate_reply(
+                    history,
+                    message,
+                    generation,
+                    cancel_event,
+                    continuation=follow,
+                )
+                total_generated += gen_count
+                prompt_token_count = ptoks
+                if not next_content.strip():
+                    # Si no hay más texto humano, devolvemos Acción + Resultado visibles.
+                    content = f"{content.strip()}\n{block}".strip()
+                    break
+                # Preferir la respuesta humana final; conservar traza en toolResults.
+                content = next_content
+                if extract_acciones(content):
+                    continue
+                break
+
             if not content:
                 content = "No produje texto en esta ejecución. Inténtalo de nuevo."
-            return {
+
+            payload_out: dict[str, Any] = {
                 "conversationId": conversation_id,
                 "message": {"role": "assistant", "content": content},
                 "usage": {
-                    "promptTokens": len(prompt_tokens),
-                    "generatedTokens": len(generated),
+                    "promptTokens": prompt_token_count,
+                    "generatedTokens": total_generated,
                     "durationMs": int((time.monotonic() - started) * 1000),
                 },
                 "model": {
@@ -633,20 +690,75 @@ class AgerbotRuntime:
                     "version": self.manifest.model_version,
                     "device": self.device.type,
                 },
+                "agentic": agentic,
             }
+            if trace.loops:
+                payload_out["toolResults"] = trace.loops
+                payload_out["toolSummary"] = trace.flat_results_text()
+            return payload_out
         finally:
             with self._active_lock:
                 self._active.pop(conversation_id, None)
 
+    def _generate_reply(
+        self,
+        history: list[dict[str, str]],
+        message: str,
+        generation: dict[str, Any],
+        cancel_event: threading.Event,
+        *,
+        continuation: str = "",
+    ) -> tuple[str, int, int]:
+        """Genera un turno. continuation se inyecta antes de 'Agerbot:' final."""
+        prompt, prompt_tokens = self._build_context_prompt(history, message)
+        if continuation.strip():
+            # Quitar el sufijo 'Agerbot:' del prompt y reinyectar con Resultado.
+            base = prompt
+            if base.rstrip().endswith("Agerbot:"):
+                base = base.rstrip()[: -len("Agerbot:")].rstrip() + "\n"
+            else:
+                base = base + "\n"
+            prompt = f"{base}{continuation.strip()}\nAgerbot:"
+            prompt_tokens = self.tokenizer.encode(prompt)
+            max_tokens = self.model.config.context_length
+            if len(prompt_tokens) > max_tokens:
+                prompt_tokens = prompt_tokens[-max_tokens:]
+                prompt = self.tokenizer.decode(prompt_tokens)
+
+        inputs = torch.tensor([prompt_tokens], dtype=torch.long, device=self.device)
+        newline_ids = set(self.tokenizer.encode("\n"))
+        output = self.model.generate(
+            inputs,
+            max_new_tokens=generation["maxNewTokens"],
+            temperature=generation["temperature"],
+            top_k=generation["topK"],
+            should_stop=cancel_event.is_set,
+            stop_token_ids=newline_ids or None,
+        )
+        if cancel_event.is_set():
+            raise RuntimeAPIError(
+                "generation_cancelled",
+                "La generación de Agerbot fue cancelada.",
+                status=HTTPStatus.CONFLICT,
+                retryable=True,
+            )
+        generated = output[0].tolist()[len(prompt_tokens) :]
+        raw_content = self.tokenizer.decode(generated)
+        content = _sanitize_generated_content(trim_assistant_completion(raw_content))
+        return content, len(generated), len(prompt_tokens)
+
     def _validate_chat(
         self, payload: dict[str, Any]
-    ) -> tuple[str, str, list[dict[str, str]], dict[str, Any]]:
+    ) -> tuple[str, str, list[dict[str, str]], dict[str, Any], bool]:
         if not isinstance(payload, dict):
             raise RuntimeAPIError("bad_request", "La petición debe ser un objeto JSON.")
         conversation_id = payload.get("conversationId")
         message = payload.get("message")
         history = payload.get("history", [])
         raw_generation = payload.get("generation", {})
+        raw_agentic = payload.get("agentic", self.agentic_default)
+        if not isinstance(raw_agentic, bool):
+            raise RuntimeAPIError("bad_request", "agentic debe ser booleano.")
         if not isinstance(conversation_id, str) or not conversation_id.strip():
             raise RuntimeAPIError("bad_request", "conversationId es obligatorio.")
         if len(conversation_id) > 128:
@@ -690,6 +802,7 @@ class AgerbotRuntime:
                 "temperature": float(temperature),
                 "topK": top_k,
             },
+            raw_agentic,
         )
 
     @staticmethod
@@ -1098,7 +1211,12 @@ class AgerbotHTTPServer(ThreadingHTTPServer):
     def reload_runtime(
         self, checkpoint_path: str | Path, *, promote_to_primary: bool = False
     ) -> None:
-        new_runtime = AgerbotRuntime(checkpoint_path, self.requested_device)
+        new_runtime = AgerbotRuntime(
+            checkpoint_path,
+            self.requested_device,
+            agentic=self.runtime.agentic_default,
+            workspace=self.runtime.tool_runtime.workspace,
+        )
         self.runtime = new_runtime
         if promote_to_primary:
             self.primary_checkpoint_path = new_runtime.checkpoint_path
@@ -1139,7 +1257,19 @@ class AgerbotRequestHandler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         try:
             payload = self._read_json()
-            if self.path == "/v1/chat":
+            path_only = self.path.split("?", 1)[0]
+            query = ""
+            if "?" in self.path:
+                query = self.path.split("?", 1)[1]
+            if path_only == "/v1/chat":
+                if "agentic" not in payload:
+                    q = {
+                        part.split("=", 1)[0]: part.split("=", 1)[1]
+                        for part in query.split("&")
+                        if part and "=" in part
+                    }
+                    if "agentic" in q:
+                        payload["agentic"] = q["agentic"].lower() in {"1", "true", "yes", "on"}
                 self._write_json(HTTPStatus.OK, self.server.runtime.chat(payload))
             elif self.path == "/v1/train/start":
                 text = payload.get("data", "")
@@ -1243,6 +1373,25 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--host", default=os.environ.get("AGERBOT_HOST", DEFAULT_HOST))
     parser.add_argument("--port", type=int, default=int(os.environ.get("AGERBOT_PORT", DEFAULT_PORT)))
     parser.add_argument("--device", default=os.environ.get("AGERBOT_DEVICE", "auto"))
+    parser.add_argument(
+        "--workspace",
+        default=os.environ.get("AGERBOT_WORKSPACE", str(Path.cwd())),
+        help="Raíz sandbox de herramientas agenticas (por defecto: cwd).",
+    )
+    agentic_group = parser.add_mutually_exclusive_group()
+    agentic_group.add_argument(
+        "--agentic",
+        dest="agentic",
+        action="store_true",
+        default=None,
+        help="Activa modo agente por defecto (Studio).",
+    )
+    agentic_group.add_argument(
+        "--no-agentic",
+        dest="agentic",
+        action="store_false",
+        help="Desactiva modo agente por defecto.",
+    )
     return parser
 
 
@@ -1251,8 +1400,21 @@ def main() -> None:
     if args.host != DEFAULT_HOST:
         print("bad_host: Agerbot solo puede escuchar en 127.0.0.1.", file=sys.stderr)
         raise SystemExit(2)
+    env_agentic = os.environ.get("AGERBOT_AGENTIC")
+    if args.agentic is None:
+        if env_agentic is None:
+            agentic = DEFAULT_AGENTIC
+        else:
+            agentic = env_agentic.strip().lower() in {"1", "true", "yes", "on"}
+    else:
+        agentic = bool(args.agentic)
     try:
-        runtime = AgerbotRuntime(args.checkpoint, args.device)
+        runtime = AgerbotRuntime(
+            args.checkpoint,
+            args.device,
+            agentic=agentic,
+            workspace=args.workspace,
+        )
         server = AgerbotHTTPServer((args.host, args.port), runtime)
     except RuntimeAPIError as error:
         print(f"{error.code}: {error.message}", file=sys.stderr)
