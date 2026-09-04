@@ -23,6 +23,7 @@ from typing import Any
 import torch
 
 from .data import load_corpus, random_batch, split_corpus
+from .generate import normalize_chat_text, trim_assistant_completion
 from .model import Agerbot, ModelConfig
 from .runtime import save_checkpoint, select_device
 from .tokenizer import tokenizer_from_dict, tokenizer_identifier
@@ -598,12 +599,14 @@ class AgerbotRuntime:
         try:
             _, prompt_tokens = self._build_context_prompt(history, message)
             inputs = torch.tensor([prompt_tokens], dtype=torch.long, device=self.device)
+            newline_ids = set(self.tokenizer.encode("\n"))
             output = self.model.generate(
                 inputs,
                 max_new_tokens=generation["maxNewTokens"],
                 temperature=generation["temperature"],
                 top_k=generation["topK"],
                 should_stop=cancel_event.is_set,
+                stop_token_ids=newline_ids or None,
             )
             if cancel_event.is_set():
                 raise RuntimeAPIError(
@@ -614,22 +617,7 @@ class AgerbotRuntime:
                 )
             generated = output[0].tolist()[len(prompt_tokens) :]
             raw_content = self.tokenizer.decode(generated)
-            stop_markers = [
-                "\n",
-                "\n\n",
-                "\nUsuario:",
-                "\nPregunta:",
-                "\nConversación:",
-                "\nConsulta:",
-                "\nChat:",
-                "\nInteracción:",
-                "\nAgerbot:",
-            ]
-            content = raw_content
-            for marker in stop_markers:
-                if marker in content:
-                    content = content.split(marker)[0]
-            content = _sanitize_generated_content(content)
+            content = _sanitize_generated_content(trim_assistant_completion(raw_content))
             if not content:
                 content = "No produje texto en esta ejecución. Inténtalo de nuevo."
             return {
@@ -709,8 +697,8 @@ class AgerbotRuntime:
         lines: list[str] = []
         for item in history:
             speaker = "Usuario" if item["role"] == "user" else "Agerbot"
-            lines.append(f"{speaker}: {item['content']}")
-        lines.append(f"Usuario: {message}")
+            lines.append(f"{speaker}: {normalize_chat_text(item['content']).strip()}")
+        lines.append(f"Usuario: {normalize_chat_text(message).strip()}")
         lines.append("Agerbot:")
         return "\n".join(lines)
 
