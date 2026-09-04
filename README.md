@@ -94,6 +94,41 @@ Cuando termine, pregunta en el chat con otras palabras para ver si entendió.
 uv run agerbot-serve --checkpoint checkpoints/agerbot/best.pt
 ```
 
+## Modo agente (v1)
+
+Agerbot puede emitir una línea de herramienta y el runtime la ejecuta en un
+sandbox local, inyecta `Resultado:` y deja que el modelo continúe (máx. 3 bucles).
+
+**Qué sí puede hacer**
+
+- `list_dir` — listar directorios dentro del workspace del proyecto.
+- `read_file` — leer archivos de texto (tamaño acotado).
+- `run_cmd` — solo `pwd`, `ls`, `date`, `whoami`, `uname`.
+- Protocolo: `Acción: list_dir {"path":"."}` → `Resultado: ...` → respuesta humana.
+
+**Qué no puede hacer**
+
+- Borrar, escribir, `sudo`, `curl`, pipes o scrapeo (p. ej. letras con copyright).
+- Salir del workspace configurado (`--workspace` / `AGERBOT_WORKSPACE`).
+- Mutar la máquina sin confirmación explícita (`"confirm": true` en la Acción).
+
+**Cómo activarlo**
+
+- Por defecto **activado** en Studio (`agentic: true`).
+- Toggle «Modo agente» en la cabecera del Studio, o en el JSON de `/v1/chat`:
+  `"agentic": true`.
+- CLI: `uv run agerbot-serve --agentic` / `--no-agentic`.
+- Corpus seed (sin entrenar aún): `data/raw/agentic_seed.txt` →
+  `uv run python scripts/build_agentic_seed.py`.
+
+Ejemplo (fuerza la herramienta desde el mensaje de usuario):
+
+```bash
+curl -s http://127.0.0.1:4318/v1/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"conversationId":"demo","message":"Acción: list_dir {\"path\":\".\"}","agentic":true,"history":[],"generation":{"maxNewTokens":64,"temperature":0.2,"topK":10}}'
+```
+
 ## Usar tus propios datos
 
 Coloca uno o varios archivos `.txt` UTF-8 en `data/raw/` y cambia `data_path` en

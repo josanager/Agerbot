@@ -37,6 +37,11 @@ WEB_UI_HTML = """<!DOCTYPE html>
 
     <!-- Status & Reset -->
     <div class="flex items-center space-x-3">
+      <button id="agenticToggle" type="button" onclick="toggleAgentic()" title="Activa herramientas locales (list_dir, read_file, run_cmd)" class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-xs font-medium hover:bg-violet-500/25 transition">
+        <span>🛠️</span>
+        <span id="agenticLabel">Modo agente</span>
+        <span id="agenticState" class="opacity-80">ON</span>
+      </button>
       <div id="statusBadge" class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
         <span id="statusText">Conectado (127.0.0.1:4318)</span>
@@ -54,7 +59,7 @@ WEB_UI_HTML = """<!DOCTYPE html>
         </div>
         <div class="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-sm p-4 text-sm text-slate-200 max-w-[85%] shadow-sm leading-relaxed">
           <p class="font-medium text-indigo-400 mb-1">Agerbot Creativo listo</p>
-          <p>Habla aquí con Agerbot. En <b>«Entrenar Modelo»</b> pegas diálogos y se entrena este mismo modelo; luego vuelve y pregúntale si lo entendió.</p>
+          <p>Habla aquí con Agerbot. <b>Modo agente</b> permite acciones locales seguras (listar, leer, pwd/ls/date). En <b>«Entrenar Modelo»</b> pegas diálogos y se entrena este mismo modelo.</p>
         </div>
       </div>
     </main>
@@ -225,6 +230,7 @@ WEB_UI_HTML = """<!DOCTYPE html>
       : 'http://127.0.0.1:4318';
       
     let conversationHistory = [];
+    let agenticEnabled = true;
     const conversationId = 'conv_' + Math.random().toString(36).substring(2, 10);
     const chatContainer = document.getElementById('chatContainer');
     const messageInput = document.getElementById('messageInput');
@@ -270,7 +276,17 @@ WEB_UI_HTML = """<!DOCTYPE html>
     checkHealth();
     setInterval(checkHealth, 4000);
 
-    function appendMessage(role, content) {
+    function toggleAgentic() {
+      agenticEnabled = !agenticEnabled;
+      const state = document.getElementById('agenticState');
+      const btn = document.getElementById('agenticToggle');
+      state.innerText = agenticEnabled ? 'ON' : 'OFF';
+      btn.className = agenticEnabled
+        ? 'flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-xs font-medium hover:bg-violet-500/25 transition'
+        : 'flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-xs font-medium hover:bg-slate-700 transition';
+    }
+
+    function appendMessage(role, content, secondary) {
       const isUser = role === 'user';
       const msgDiv = document.createElement('div');
       msgDiv.className = `flex items-start space-x-3 ${isUser ? 'flex-row-reverse space-x-reverse' : ''}`;
@@ -283,9 +299,13 @@ WEB_UI_HTML = """<!DOCTYPE html>
         ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-sm p-4 text-sm max-w-[85%] shadow-md leading-relaxed whitespace-pre-wrap'
         : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-2xl rounded-tl-sm p-4 text-sm max-w-[85%] shadow-sm leading-relaxed whitespace-pre-wrap';
 
+      const secondaryHtml = secondary
+        ? `<pre class="mt-3 pt-3 border-t border-slate-700/80 text-[11px] text-slate-400 whitespace-pre-wrap font-mono leading-snug overflow-x-auto">${escapeHtml(secondary)}</pre>`
+        : '';
+
       msgDiv.innerHTML = `
         ${icon}
-        <div class="${bubbleClass}">${escapeHtml(content)}</div>
+        <div class="${bubbleClass}"><div>${escapeHtml(content)}</div>${secondaryHtml}</div>
       `;
       chatContainer.appendChild(msgDiv);
       chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -356,6 +376,7 @@ WEB_UI_HTML = """<!DOCTYPE html>
             conversationId: conversationId,
             message: text,
             history: conversationHistory,
+            agentic: agenticEnabled,
             generation: {
               temperature: 0.55,
               maxNewTokens: 256,
@@ -373,7 +394,10 @@ WEB_UI_HTML = """<!DOCTYPE html>
 
         const data = await response.json();
         const assistantText = data.message?.content || 'Sin respuesta.';
-        appendMessage('assistant', assistantText);
+        const toolSecondary = data.toolSummary
+          ? ('🛠️ ' + data.toolSummary)
+          : '';
+        appendMessage('assistant', assistantText, toolSecondary || null);
 
         conversationHistory.push({ role: 'user', content: text });
         conversationHistory.push({ role: 'assistant', content: assistantText });

@@ -289,6 +289,9 @@ class RuntimeFailureTests(unittest.TestCase):
         runtime.model = SlowModel()
         runtime.tokenizer = __import__("agerbot").ByteTokenizer()
         runtime.device = torch.device("cpu")
+        runtime.agentic_default = False
+        runtime.tool_runtime = None
+        runtime.manifest = type("M", (), {"model_name": "Agerbot", "model_version": "test"})()
         runtime._active = {}
         runtime._active_lock = threading.Lock()
         result: list[str] = []
