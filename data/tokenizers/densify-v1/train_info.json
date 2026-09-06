@@ -1,0 +1,11 @@
+{
+  "type": "bpe",
+  "version": 1,
+  "vocab_size": 5421,
+  "corpora": [
+    "data/processed/agerbot_learn_v1.txt",
+    "data/processed/agerbot_social_v2.txt"
+  ],
+  "sample_roundtrip_ok": true,
+  "n_sample_tokens": 12
+}

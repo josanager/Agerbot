@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 2,
+  "channel": "stable",
+  "model": {
+    "name": "Agerbot",
+    "version": "densify-v1d",
+    "trainingName": "densify-v1d",
+    "architecture": "agerbot-transformer",
+    "tokenizer": "bpe-v1",
+    "parameters": 19925376,
+    "contextLength": 256
+  },
+  "runtime": {
+    "minimumVersion": "0.2.0",
+    "maximumVersion": null
+  },
+  "checkpoint": {
+    "filename": "best.pt",
+    "sizeBytes": 44218784,
+    "sha256": "026cf07f85ed69ed4b84bb786f105db2054ca2542879b458997f873d7041495f"
+  },
+  "training": {
+    "mode": "from_scratch",
+    "note": "BPE densify-v1d gate PASS acc~0.525 mem~0.30"
+  },
+  "publishedAt": "2026-09-04T17:57:12Z"
+}

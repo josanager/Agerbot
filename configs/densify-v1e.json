@@ -1,0 +1,55 @@
+{
+  "seed": 20260908,
+  "data_path": "data/processed/agerbot_learn_v1.txt",
+  "checkpoint_dir": "checkpoints/densify-v1e",
+  "device": "cpu",
+  "init_checkpoint": "checkpoints/densify-v1d/best.pt",
+  "tokenizer": {
+    "type": "bpe",
+    "version": 1,
+    "path": "data/tokenizers/densify-v1"
+  },
+  "multitarget": {
+    "enabled": true,
+    "max_extra_turns": 16000,
+    "min_variants": 2,
+    "max_remixes_per_user": 6,
+    "dedupe_near_identical": true,
+    "dedupe_threshold": 0.85,
+    "marker_variants": 2500
+  },
+  "checkpoint_float16": true,
+  "train_fraction": 0.9,
+  "batch_size": 2,
+  "gradient_accumulation_steps": 8,
+  "max_steps": 100000,
+  "max_duration_seconds": 2100,
+  "eval_interval": 100,
+  "eval_batches": 8,
+  "save_interval": 300,
+  "early_stopping_patience": 20,
+  "learning_rate": 0.0001,
+  "weight_decay": 0.32,
+  "grad_clip": 1.0,
+  "sample_tokens": 160,
+  "bank_selection": {
+    "enabled": true,
+    "interval": 150,
+    "bank_path": "data/evaluation/learn_bank_v1.jsonl",
+    "train_corpus": "data/processed/agerbot_social_v2.txt",
+    "max_new_tokens": 80,
+    "temperature": 0.7,
+    "top_k": 40,
+    "patience": 5,
+    "limit": null,
+    "score_mode": "gate_prefer"
+  },
+  "model": {
+    "vocab_size": 5421,
+    "context_length": 256,
+    "d_model": 384,
+    "n_heads": 8,
+    "n_layers": 10,
+    "dropout": 0.32
+  }
+}

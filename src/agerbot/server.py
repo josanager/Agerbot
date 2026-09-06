@@ -14,7 +14,7 @@ import signal
 import sys
 import threading
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -23,9 +23,17 @@ from typing import Any
 import torch
 
 from .data import load_corpus, random_batch, split_corpus
+from .generate import normalize_chat_text, trim_assistant_completion
 from .model import Agerbot, ModelConfig
-from .runtime import save_checkpoint, select_device
+from .runtime import load_checkpoint, save_checkpoint, select_device
 from .tokenizer import tokenizer_from_dict, tokenizer_identifier
+from .tools import (
+    AgenticTrace,
+    ToolRuntime,
+    extract_acciones,
+    format_resultado,
+    run_acciones,
+)
 from .train import estimate_loss
 from .web_ui import WEB_UI_HTML
 
@@ -39,6 +47,8 @@ MAX_MESSAGE_BYTES = 16 * 1024
 MAX_HISTORY_ITEMS = 32
 MAX_HISTORY_BYTES = 64 * 1024
 MAX_CONTEXT_HISTORY_ITEM_CHARS = 320
+MAX_AGENTIC_LOOPS = 3
+DEFAULT_AGENTIC = True
 NEXT_CONTEXT_LENGTH = 1024
 REFERENCE_BATCH_SIZE = 16
 REFERENCE_CONTEXT_LENGTH = 256
@@ -360,9 +370,24 @@ def _resolve_training_corpus(
     )
 
 
+def _ensure_dialogue_format(text: str) -> str:
+    """Si el pegado no trae turnos Usuario/Agerbot, lo envuelve en un diálogo."""
+    stripped = text.strip()
+    if not stripped:
+        return stripped
+    if any(line.startswith("Usuario:") for line in stripped.splitlines()):
+        return stripped + "\n"
+    return (
+        "Usuario: Explícame esto con tus palabras, sin copiar el texto tal cual.\n"
+        f"Agerbot: {stripped}\n"
+    )
+
+
 def _merge_training_corpus(base_text: str, new_text: str) -> tuple[str, int, int]:
+    formatted = _ensure_dialogue_format(new_text)
     base_blocks = [_sanitize_training_block(block) for block in _training_blocks(base_text)]
-    new_blocks = [_sanitize_training_block(block) for block in _training_blocks(new_text)]
+    new_blocks = [_sanitize_training_block(block) for block in _training_blocks(formatted)]
+    new_blocks = [block for block in new_blocks if block]
     if not base_blocks:
         raise RuntimeAPIError(
             "base_corpus_empty", "El corpus del modelo principal está vacío."
@@ -372,11 +397,9 @@ def _merge_training_corpus(base_text: str, new_text: str) -> tuple[str, int, int
             "data_too_short", "El texto nuevo no contiene bloques de entrenamiento válidos."
         )
 
-    # Repetimos únicamente los datos nuevos hasta darles suficiente peso, pero
-    # siempre conservamos el corpus completo del modelo principal. Así el ajuste
-    # aprende la nueva materia sin convertirla en el único comportamiento.
-    min_new_characters = 150_000
-    repetitions = max(1, min_new_characters // max(1, len(new_text)))
+    # Pocas repeticiones: mezcla con el corpus principal para generalizar,
+    # no para que el modelo recote el pegado.
+    repetitions = 2
     repeated_new_blocks: list[str] = []
     for _ in range(repetitions):
         shuffled = new_blocks.copy()
@@ -386,7 +409,7 @@ def _merge_training_corpus(base_text: str, new_text: str) -> tuple[str, int, int
     merged_blocks = base_blocks + repeated_new_blocks
     random.shuffle(merged_blocks)
     merged_text = "\n\n".join(merged_blocks) + "\n"
-    return merged_text, len(base_text), len(new_text)
+    return merged_text, len(base_text), len(formatted)
 
 
 def _build_incremental_model(
@@ -454,12 +477,24 @@ def _training_batch_plan(context_length: int) -> tuple[int, int]:
 
 
 class AgerbotRuntime:
-    def __init__(self, checkpoint_path: str | Path, requested_device: str = "auto") -> None:
+    def __init__(
+        self,
+        checkpoint_path: str | Path,
+        requested_device: str = "auto",
+        *,
+        agentic: bool = DEFAULT_AGENTIC,
+        agentic_auto: bool = False,
+        workspace: str | Path | None = None,
+    ) -> None:
+        self.agentic_default = bool(agentic)
+        self.agentic_auto_default = bool(agentic_auto)
+        root = Path(workspace).expanduser().resolve() if workspace else Path.cwd().resolve()
+        self.tool_runtime = ToolRuntime(workspace=root, auto=self.agentic_auto_default)
         self.checkpoint_path = Path(checkpoint_path).expanduser().resolve()
         self.manifest = load_checkpoint_manifest(self.checkpoint_path)
         self.device = select_device(requested_device)
         try:
-            checkpoint = torch.load(
+            checkpoint = load_checkpoint(
                 self.checkpoint_path, map_location=self.device, weights_only=True
             )
             if "tokenizer" not in checkpoint:
@@ -532,6 +567,8 @@ class AgerbotRuntime:
                 "tokenizer": self.tokenizer_name,
                 "contextLength": self.model.config.context_length,
             },
+            "agentic": self.agentic_default,
+            "agenticAuto": self.agentic_auto_default,
         }
 
     def capabilities(self) -> dict[str, Any]:
@@ -558,6 +595,25 @@ class AgerbotRuntime:
                 "supported": True,
                 "recommendedDevice": self.device.type,
             },
+            "agentic": {
+                "supported": True,
+                "enabledByDefault": self.agentic_default,
+                "autoByDefault": self.agentic_auto_default,
+                "maxLoops": MAX_AGENTIC_LOOPS,
+                "tools": [
+                    "list_dir",
+                    "read_file",
+                    "run_cmd",
+                    "move_file",
+                    "copy_file",
+                    "write_file",
+                    "mkdir",
+                    "delete_file",
+                ],
+                "autoTools": ["move_file", "copy_file", "write_file", "mkdir"],
+                "confirmAlways": ["delete_file"],
+                "workspace": str(self.tool_runtime.workspace),
+            },
         }
 
     def cancel(self, conversation_id: str) -> bool:
@@ -569,7 +625,12 @@ class AgerbotRuntime:
             return True
 
     def chat(self, payload: dict[str, Any]) -> dict[str, Any]:
-        conversation_id, message, history, generation = self._validate_chat(payload)
+        conversation_id, message, history, generation, agentic, agentic_auto = self._validate_chat(payload)
+        tool_runtime = (
+            replace(self.tool_runtime, auto=bool(agentic_auto))
+            if self.tool_runtime is not None
+            else None
+        )
         cancel_event = threading.Event()
         with self._active_lock:
             if conversation_id in self._active:
@@ -582,49 +643,66 @@ class AgerbotRuntime:
             self._active[conversation_id] = cancel_event
 
         started = time.monotonic()
+        total_generated = 0
+        prompt_token_count = 0
+        trace = AgenticTrace()
         try:
-            _, prompt_tokens = self._build_context_prompt(history, message)
-            inputs = torch.tensor([prompt_tokens], dtype=torch.long, device=self.device)
-            output = self.model.generate(
-                inputs,
-                max_new_tokens=generation["maxNewTokens"],
-                temperature=generation["temperature"],
-                top_k=generation["topK"],
-                should_stop=cancel_event.is_set,
+            continuation = ""
+            if agentic and tool_runtime is not None:
+                user_calls = extract_acciones(message)
+                if user_calls:
+                    results, block = run_acciones(
+                        message, tool_runtime, max_calls=MAX_AGENTIC_LOOPS
+                    )
+                    trace.add("user", user_calls[:MAX_AGENTIC_LOOPS], results)
+                    continuation = block
+
+            content, gen_count, prompt_token_count = self._generate_reply(
+                history, message, generation, cancel_event, continuation=continuation
             )
-            if cancel_event.is_set():
-                raise RuntimeAPIError(
-                    "generation_cancelled",
-                    "La generación de Agerbot fue cancelada.",
-                    status=HTTPStatus.CONFLICT,
-                    retryable=True,
+            total_generated += gen_count
+
+            loops = 0
+            while agentic and tool_runtime is not None and loops < MAX_AGENTIC_LOOPS:
+                calls = extract_acciones(content)
+                if not calls:
+                    break
+                results, block = run_acciones(
+                    content, tool_runtime, max_calls=MAX_AGENTIC_LOOPS - loops
                 )
-            generated = output[0].tolist()[len(prompt_tokens) :]
-            raw_content = self.tokenizer.decode(generated)
-            stop_markers = [
-                "\n",
-                "\n\n",
-                "\nUsuario:",
-                "\nPregunta:",
-                "\nConversación:",
-                "\nConsulta:",
-                "\nChat:",
-                "\nInteracción:",
-                "\nAgerbot:",
-            ]
-            content = raw_content
-            for marker in stop_markers:
-                if marker in content:
-                    content = content.split(marker)[0]
-            content = _sanitize_generated_content(content)
+                used = extract_acciones(content)[: MAX_AGENTIC_LOOPS - loops]
+                trace.add("model", used, results)
+                loops += 1
+                # El modelo emitió Acción; inyectamos Resultado y pedimos continuación.
+                follow = f"{content.strip()}\n{block}"
+                next_content, gen_count, ptoks = self._generate_reply(
+                    history,
+                    message,
+                    generation,
+                    cancel_event,
+                    continuation=follow,
+                )
+                total_generated += gen_count
+                prompt_token_count = ptoks
+                if not next_content.strip():
+                    # Si no hay más texto humano, devolvemos Acción + Resultado visibles.
+                    content = f"{content.strip()}\n{block}".strip()
+                    break
+                # Preferir la respuesta humana final; conservar traza en toolResults.
+                content = next_content
+                if extract_acciones(content):
+                    continue
+                break
+
             if not content:
                 content = "No produje texto en esta ejecución. Inténtalo de nuevo."
-            return {
+
+            payload_out: dict[str, Any] = {
                 "conversationId": conversation_id,
                 "message": {"role": "assistant", "content": content},
                 "usage": {
-                    "promptTokens": len(prompt_tokens),
-                    "generatedTokens": len(generated),
+                    "promptTokens": prompt_token_count,
+                    "generatedTokens": total_generated,
                     "durationMs": int((time.monotonic() - started) * 1000),
                 },
                 "model": {
@@ -632,20 +710,79 @@ class AgerbotRuntime:
                     "version": self.manifest.model_version,
                     "device": self.device.type,
                 },
+                "agentic": agentic,
+                "agenticAuto": agentic_auto,
             }
+            if trace.loops:
+                payload_out["toolResults"] = trace.loops
+                payload_out["toolSummary"] = trace.flat_results_text()
+            return payload_out
         finally:
             with self._active_lock:
                 self._active.pop(conversation_id, None)
 
+    def _generate_reply(
+        self,
+        history: list[dict[str, str]],
+        message: str,
+        generation: dict[str, Any],
+        cancel_event: threading.Event,
+        *,
+        continuation: str = "",
+    ) -> tuple[str, int, int]:
+        """Genera un turno. continuation se inyecta antes de 'Agerbot:' final."""
+        prompt, prompt_tokens = self._build_context_prompt(history, message)
+        if continuation.strip():
+            # Quitar el sufijo 'Agerbot:' del prompt y reinyectar con Resultado.
+            base = prompt
+            if base.rstrip().endswith("Agerbot:"):
+                base = base.rstrip()[: -len("Agerbot:")].rstrip() + "\n"
+            else:
+                base = base + "\n"
+            prompt = f"{base}{continuation.strip()}\nAgerbot:"
+            prompt_tokens = self.tokenizer.encode(prompt)
+            max_tokens = self.model.config.context_length
+            if len(prompt_tokens) > max_tokens:
+                prompt_tokens = prompt_tokens[-max_tokens:]
+                prompt = self.tokenizer.decode(prompt_tokens)
+
+        inputs = torch.tensor([prompt_tokens], dtype=torch.long, device=self.device)
+        newline_ids = set(self.tokenizer.encode("\n"))
+        output = self.model.generate(
+            inputs,
+            max_new_tokens=generation["maxNewTokens"],
+            temperature=generation["temperature"],
+            top_k=generation["topK"],
+            should_stop=cancel_event.is_set,
+            stop_token_ids=newline_ids or None,
+        )
+        if cancel_event.is_set():
+            raise RuntimeAPIError(
+                "generation_cancelled",
+                "La generación de Agerbot fue cancelada.",
+                status=HTTPStatus.CONFLICT,
+                retryable=True,
+            )
+        generated = output[0].tolist()[len(prompt_tokens) :]
+        raw_content = self.tokenizer.decode(generated)
+        content = _sanitize_generated_content(trim_assistant_completion(raw_content))
+        return content, len(generated), len(prompt_tokens)
+
     def _validate_chat(
         self, payload: dict[str, Any]
-    ) -> tuple[str, str, list[dict[str, str]], dict[str, Any]]:
+    ) -> tuple[str, str, list[dict[str, str]], dict[str, Any], bool, bool]:
         if not isinstance(payload, dict):
             raise RuntimeAPIError("bad_request", "La petición debe ser un objeto JSON.")
         conversation_id = payload.get("conversationId")
         message = payload.get("message")
         history = payload.get("history", [])
         raw_generation = payload.get("generation", {})
+        raw_agentic = payload.get("agentic", self.agentic_default)
+        if not isinstance(raw_agentic, bool):
+            raise RuntimeAPIError("bad_request", "agentic debe ser booleano.")
+        raw_agentic_auto = payload.get("agenticAuto", self.agentic_auto_default)
+        if not isinstance(raw_agentic_auto, bool):
+            raise RuntimeAPIError("bad_request", "agenticAuto debe ser booleano.")
         if not isinstance(conversation_id, str) or not conversation_id.strip():
             raise RuntimeAPIError("bad_request", "conversationId es obligatorio.")
         if len(conversation_id) > 128:
@@ -689,6 +826,8 @@ class AgerbotRuntime:
                 "temperature": float(temperature),
                 "topK": top_k,
             },
+            raw_agentic,
+            raw_agentic_auto,
         )
 
     @staticmethod
@@ -696,8 +835,8 @@ class AgerbotRuntime:
         lines: list[str] = []
         for item in history:
             speaker = "Usuario" if item["role"] == "user" else "Agerbot"
-            lines.append(f"{speaker}: {item['content']}")
-        lines.append(f"Usuario: {message}")
+            lines.append(f"{speaker}: {normalize_chat_text(item['content']).strip()}")
+        lines.append(f"Usuario: {normalize_chat_text(message).strip()}")
         lines.append("Agerbot:")
         return "\n".join(lines)
 
@@ -802,8 +941,8 @@ class TrainingManager:
             if self.status == "training":
                 raise RuntimeAPIError("already_training", "Ya hay un entrenamiento en curso.", status=HTTPStatus.CONFLICT)
             
-            clean_text = text.strip()
-            if len(clean_text) < 20:
+            clean_text = _ensure_dialogue_format(text)
+            if len(clean_text.strip()) < 20:
                 raise RuntimeAPIError("data_too_short", "El texto es demasiado corto. Escribe al menos un par de diálogos.")
 
             if self.server is None:
@@ -823,8 +962,9 @@ class TrainingManager:
                     status=HTTPStatus.SERVICE_UNAVAILABLE,
                 )
             
-            timestamp = time.strftime("%Y%m%d_%H%M%S")
-            clean_name = re.sub(r"[^a-zA-Z0-9_-]", "_", name.strip()) if name.strip() else f"modelo_{timestamp}"
+            # Siempre es el mismo Agerbot. El nombre opcional solo se anota en el log.
+            note = re.sub(r"[^a-zA-Z0-9_-]", "_", name.strip()) if name.strip() else ""
+            clean_name = "agerbot"
             self.session_name = clean_name
             self.status = "training"
             self.step = 0
@@ -839,7 +979,8 @@ class TrainingManager:
             self.base_corpus_characters = 0
             self.new_corpus_characters = len(clean_text)
             self.merged_corpus_characters = 0
-            self.logs = [f"🚀 Iniciando entrenamiento: {clean_name} ({duration_minutes} min)..."]
+            note_bit = f" ({note})" if note else ""
+            self.logs = [f"🚀 Entrenando el mismo Agerbot{note_bit} ({duration_minutes} min)..."]
             
             self._thread = threading.Thread(
                 target=self._run_training,
@@ -859,10 +1000,10 @@ class TrainingManager:
         try:
             processed_dir = Path("data/processed")
             processed_dir.mkdir(parents=True, exist_ok=True)
-            data_file = processed_dir / f"{session_name}.txt"
+            data_file = processed_dir / "agerbot.txt"
 
             base_manifest = load_checkpoint_manifest(base_checkpoint_path)
-            base_checkpoint = torch.load(
+            base_checkpoint = load_checkpoint(
                 base_checkpoint_path, map_location="cpu", weights_only=True
             )
             base_training_name = base_manifest.training_name
@@ -910,7 +1051,9 @@ class TrainingManager:
                     "El tokenizador del modelo principal no coincide con su vocabulario.",
                 )
             model, model_config, base_context_length = _build_incremental_model(
-                base_checkpoint, device
+                base_checkpoint,
+                device,
+                target_context_length=base_model_config.context_length,
             )
             batch_size, gradient_accumulation = _training_batch_plan(
                 model_config.context_length
@@ -924,7 +1067,7 @@ class TrainingManager:
             # Los ajustes encadenados habían reducido la tasa hasta volver
             # simbólico el aprendizaje. Conservamos un ajuste pequeño, pero
             # suficiente para que los nuevos turnos de conversación se aprendan.
-            learning_rate = min(max(base_learning_rate * 4.0, 0.000005), 0.00005)
+            learning_rate = min(max(base_learning_rate, 0.00008), 0.00015)
             optimizer = torch.optim.AdamW(
                 model.parameters(), lr=learning_rate, weight_decay=0.05
             )
@@ -1034,7 +1177,7 @@ class TrainingManager:
                 "model": {
                     "name": "Agerbot",
                     "version": "custom",
-                    "trainingName": session_name,
+                    "trainingName": "agerbot",
                     "architecture": "agerbot-transformer",
                     "tokenizer": tokenizer_identifier(tokenizer.to_dict()),
                     "parameters": model.parameter_count(),
@@ -1068,7 +1211,7 @@ class TrainingManager:
                 self.status = "completed"
                 self.checkpoint_path = str(best_checkpoint_path)
                 self.elapsed_seconds = max_duration
-                self.logs.append(f"🎉 ¡Entrenamiento Terminado! Nuevo modelo publicado y activo ({model.parameter_count():,} parámetros, {best_checkpoint_path.stat().st_size / (1024*1024):.1f} MB).")
+                self.logs.append(f"🎉 Agerbot actualizado ({model.parameter_count():,} parámetros, {best_checkpoint_path.stat().st_size / (1024*1024):.1f} MB). Pregúntale en el chat con otras palabras.")
         except Exception as e:
             with self.lock:
                 self.status = "failed"
@@ -1093,7 +1236,13 @@ class AgerbotHTTPServer(ThreadingHTTPServer):
     def reload_runtime(
         self, checkpoint_path: str | Path, *, promote_to_primary: bool = False
     ) -> None:
-        new_runtime = AgerbotRuntime(checkpoint_path, self.requested_device)
+        new_runtime = AgerbotRuntime(
+            checkpoint_path,
+            self.requested_device,
+            agentic=self.runtime.agentic_default,
+            agentic_auto=self.runtime.agentic_auto_default,
+            workspace=self.runtime.tool_runtime.workspace,
+        )
         self.runtime = new_runtime
         if promote_to_primary:
             self.primary_checkpoint_path = new_runtime.checkpoint_path
@@ -1134,7 +1283,21 @@ class AgerbotRequestHandler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         try:
             payload = self._read_json()
-            if self.path == "/v1/chat":
+            path_only = self.path.split("?", 1)[0]
+            query = ""
+            if "?" in self.path:
+                query = self.path.split("?", 1)[1]
+            if path_only == "/v1/chat":
+                if "agentic" not in payload or "agenticAuto" not in payload:
+                    q = {
+                        part.split("=", 1)[0]: part.split("=", 1)[1]
+                        for part in query.split("&")
+                        if part and "=" in part
+                    }
+                    if "agentic" not in payload and "agentic" in q:
+                        payload["agentic"] = q["agentic"].lower() in {"1", "true", "yes", "on"}
+                    if "agenticAuto" not in payload and "agenticAuto" in q:
+                        payload["agenticAuto"] = q["agenticAuto"].lower() in {"1", "true", "yes", "on"}
                 self._write_json(HTTPStatus.OK, self.server.runtime.chat(payload))
             elif self.path == "/v1/train/start":
                 text = payload.get("data", "")
@@ -1238,6 +1401,39 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--host", default=os.environ.get("AGERBOT_HOST", DEFAULT_HOST))
     parser.add_argument("--port", type=int, default=int(os.environ.get("AGERBOT_PORT", DEFAULT_PORT)))
     parser.add_argument("--device", default=os.environ.get("AGERBOT_DEVICE", "auto"))
+    parser.add_argument(
+        "--workspace",
+        default=os.environ.get("AGERBOT_WORKSPACE", str(Path.cwd())),
+        help="Raíz sandbox de herramientas agenticas (por defecto: cwd).",
+    )
+    agentic_group = parser.add_mutually_exclusive_group()
+    agentic_group.add_argument(
+        "--agentic",
+        dest="agentic",
+        action="store_true",
+        default=None,
+        help="Activa modo agente por defecto (Studio).",
+    )
+    agentic_group.add_argument(
+        "--no-agentic",
+        dest="agentic",
+        action="store_false",
+        help="Desactiva modo agente por defecto.",
+    )
+    auto_group = parser.add_mutually_exclusive_group()
+    auto_group.add_argument(
+        "--agentic-auto",
+        dest="agentic_auto",
+        action="store_true",
+        default=None,
+        help="Auto-confirma move/copy/write/mkdir dentro del workspace.",
+    )
+    auto_group.add_argument(
+        "--no-agentic-auto",
+        dest="agentic_auto",
+        action="store_false",
+        help="Exige confirm explícito para mutaciones (por defecto).",
+    )
     return parser
 
 
@@ -1246,8 +1442,30 @@ def main() -> None:
     if args.host != DEFAULT_HOST:
         print("bad_host: Agerbot solo puede escuchar en 127.0.0.1.", file=sys.stderr)
         raise SystemExit(2)
+    env_agentic = os.environ.get("AGERBOT_AGENTIC")
+    if args.agentic is None:
+        if env_agentic is None:
+            agentic = DEFAULT_AGENTIC
+        else:
+            agentic = env_agentic.strip().lower() in {"1", "true", "yes", "on"}
+    else:
+        agentic = bool(args.agentic)
+    env_auto = os.environ.get("AGERBOT_AGENTIC_AUTO")
+    if args.agentic_auto is None:
+        if env_auto is None:
+            agentic_auto = False
+        else:
+            agentic_auto = env_auto.strip().lower() in {"1", "true", "yes", "on"}
+    else:
+        agentic_auto = bool(args.agentic_auto)
     try:
-        runtime = AgerbotRuntime(args.checkpoint, args.device)
+        runtime = AgerbotRuntime(
+            args.checkpoint,
+            args.device,
+            agentic=agentic,
+            agentic_auto=agentic_auto,
+            workspace=args.workspace,
+        )
         server = AgerbotHTTPServer((args.host, args.port), runtime)
     except RuntimeAPIError as error:
         print(f"{error.code}: {error.message}", file=sys.stderr)

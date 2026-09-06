@@ -1,0 +1,48 @@
+{
+  "checkpoint_dir": "checkpoints/densify-v1d",
+  "candidates": [
+    {
+      "checkpoint": "checkpoints/densify-v1d/bankcand-000001.pt",
+      "accuracy": 0.0,
+      "memorization_rate": 0.0,
+      "score": 0.0,
+      "parameters": 19925376
+    },
+    {
+      "checkpoint": "checkpoints/densify-v1d/bankcand-000200.pt",
+      "accuracy": 0.125,
+      "memorization_rate": 0.0,
+      "score": 0.125,
+      "parameters": 19925376
+    },
+    {
+      "checkpoint": "checkpoints/densify-v1d/bankcand-000400.pt",
+      "accuracy": 0.25,
+      "memorization_rate": 0.075,
+      "score": 0.175,
+      "parameters": 19925376
+    },
+    {
+      "checkpoint": "checkpoints/densify-v1d/bankcand-000600.pt",
+      "accuracy": 0.325,
+      "memorization_rate": 0.075,
+      "score": 0.25,
+      "parameters": 19925376
+    },
+    {
+      "checkpoint": "checkpoints/densify-v1d/best_val_loss.pt",
+      "accuracy": 0.475,
+      "memorization_rate": 0.25,
+      "score": 0.225,
+      "parameters": 19925376
+    }
+  ],
+  "best": {
+    "checkpoint": "checkpoints/densify-v1d/bankcand-000600.pt",
+    "accuracy": 0.325,
+    "memorization_rate": 0.075,
+    "score": 0.25,
+    "parameters": 19925376
+  },
+  "selection_metric": "accuracy - memorization_rate"
+}

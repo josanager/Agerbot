@@ -275,7 +275,7 @@ class RuntimeFailureTests(unittest.TestCase):
         class SlowModel:
             config = ModelConfig(context_length=16)
 
-            def generate(self, tokens, max_new_tokens, temperature, top_k, should_stop):
+            def generate(self, tokens, max_new_tokens, temperature, top_k, should_stop, stop_token_ids=None):
                 for _ in range(100):
                     if should_stop():
                         return tokens
@@ -289,6 +289,10 @@ class RuntimeFailureTests(unittest.TestCase):
         runtime.model = SlowModel()
         runtime.tokenizer = __import__("agerbot").ByteTokenizer()
         runtime.device = torch.device("cpu")
+        runtime.agentic_default = False
+        runtime.agentic_auto_default = False
+        runtime.tool_runtime = None
+        runtime.manifest = type("M", (), {"model_name": "Agerbot", "model_version": "test"})()
         runtime._active = {}
         runtime._active_lock = threading.Lock()
         result: list[str] = []
